@@ -66,6 +66,14 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   _>>_ : ∀ {A B} → F A → F B → F B
   mx >> my = mx >>= (const my)
 
+record MonadPlus (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
+  constructor mkMonadPlus
+  open KleisliTriple kl
+  field
+    mzero : ∀ {A} → F A
+    mplus : ∀ {A} → F A → F A → F A
+    mzero-unit₁ : ∀ {A}(mx : F A) → (mplus mzero mx) ≡ mx
+    mzero-unit₂ : ∀ {A}(fx gx hx : F A) → (mplus (mplus fx gx) hx) ≡ (mplus fx (mplus gx hx))
 
 
 
