@@ -25,6 +25,16 @@ record Applicative (F : Set → Set) : Set₁ where
     hom_law : ∀ {A B}(f : A → B)(x : A) → (pure f <*> pure x) ≡ pure (f x)
     app_pure_law : ∀ {A B}(f : F (A → B))(x : A) → (f <*> pure x) ≡ (pure (λ f → f $ x) <*> f)
 
+record Alternative (F : Set → Set) (app : Applicative F) : Set₁ where
+  constructor mkAlternative
+  infixl 3 _<|>_
+  open Applicative app
+  field
+    empty : ∀ {A} → F A
+    _<|>_ : ∀ {A} → F A → F A → F A
+    empty_unit₁ : ∀ {A}(fx : F A) → (fx <|> empty) ≡ fx
+    empty_unit₂ : ∀ {A}(fx : F A) → (empty <|> fx) ≡ fx
+    assoc-<|> : ∀ {A} (fx gx hx : F A) → ((fx <|> gx) <|> hx) ≡ (fx <|> (gx <|> hx)) 
 
 record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
   constructor mkMonad
@@ -55,4 +65,8 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   _>>=_ = flip bind
   _>>_ : ∀ {A B} → F A → F B → F B
   mx >> my = mx >>= (const my)
+
+
+
+
   
