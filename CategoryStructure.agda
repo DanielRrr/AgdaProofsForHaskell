@@ -25,6 +25,12 @@ record Applicative (F : Set → Set) : Set₁ where
     hom_law : ∀ {A B}(f : A → B)(x : A) → (pure f <*> pure x) ≡ pure (f x)
     app_pure_law : ∀ {A B}(f : F (A → B))(x : A) → (f <*> pure x) ≡ (pure (λ f → f $ x) <*> f)
 
+record Traversable (F : Set → Set) (app : Applicative F) : Set₁ where
+  constructor mkTraversable
+  open Applicative app
+  field
+    traverse : ∀ {A B}{G : Set → Set}{AG : Applicative G} → (A → F B) → G A → F (G B)
+
 record Alternative (F : Set → Set) (app : Applicative F) : Set₁ where
   constructor mkAlternative
   infixl 3 _<|>_
@@ -74,6 +80,7 @@ record MonadPlus (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
     mplus : ∀ {A} → F A → F A → F A
     mzero-unit₁ : ∀ {A}(mx : F A) → (mplus mzero mx) ≡ mx
     mzero-unit₂ : ∀ {A}(fx gx hx : F A) → (mplus (mplus fx gx) hx) ≡ (mplus fx (mplus gx hx))
+    
 
 
 
