@@ -43,3 +43,17 @@ record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
     unity-left : ∀ {A}(mx : F A) → join (return mx) ≡ mx
     unity-right : ∀ {A}(mx : F A) → join (fmap return mx) ≡ mx
     naturality-return : ∀ {A B} (f : A → F B)(x : A) → return (f x) ≡ fmap f (return x)
+  bind : ∀ {A B} → (A → F B) → F A → F B
+  bind f = join ∘ fmap f
+
+record KleisliTriple (F : Set → Set) : Set₁ where
+  constructor mkKleisli 
+  field
+    return : ∀ {A} → A → F A
+    bind : ∀ {A B} → (A → F B) → F A → F B
+    assoc-bind : ∀ {A B C} → (f : A → F B) → (g : B → F C) → (mx : F A) → bind g (bind f mx) ≡ bind (bind g ∘ f) mx
+    unity-left-bind : ∀ {A B} → (f : A → F B) → (x : A) → bind f (return x) ≡ f x
+    unity-right-bind : ∀ {A}(mx : F A) → bind return mx ≡ mx
+  infixr 1 _>>=_
+  _>>=_ : ∀ {A B} → (A → F B) → F A → F B
+  f >>= x = bind f x
