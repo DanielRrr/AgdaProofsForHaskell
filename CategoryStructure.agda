@@ -1,17 +1,10 @@
 module CategoryStructure where
 
-open import Function using (id; _∘_)
+open import Function
 
 infix 4 _≡_
 data _≡_ {α}{A : Set α}(x : A) : A → Set where
   refl : x ≡ x
-
-infixl 0 _$_
-_$_ : ∀ {α β}
-      → {A : Set α} {B : A → Set β}
-      → (f : (x : A) → B x)
-      → ((x : A) → B x)
-f $ x = f x
 
 record Functor (F : Set → Set) : Set₁ where
   constructor mkFunctor
@@ -54,6 +47,12 @@ record KleisliTriple (F : Set → Set) : Set₁ where
     assoc-bind : ∀ {A B C} → (f : A → F B) → (g : B → F C) → (mx : F A) → bind g (bind f mx) ≡ bind (bind g ∘ f) mx
     unity-left-bind : ∀ {A B} → (f : A → F B) → (x : A) → bind f (return x) ≡ f x
     unity-right-bind : ∀ {A}(mx : F A) → bind return mx ≡ mx
-  infixr 1 _>>=_
-  _>>=_ : ∀ {A B} → (A → F B) → F A → F B
-  f >>= x = bind f x
+  infixr 1 _=<<_
+  _=<<_ : ∀ {A B} → (A → F B) → F A → F B
+  f =<< x = bind f x
+  infixl 1 _>>=_ _>>_
+  _>>=_ : ∀ {A B} → F A → (A → F B) → F B
+  _>>=_ = flip bind
+  _>>_ : ∀ {A B} → F A → F B → F B
+  mx >> my = mx >>= (const my)
+  
