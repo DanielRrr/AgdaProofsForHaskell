@@ -1,22 +1,27 @@
 module CategoryStructure where
 
 open import Function
-
-infix 4 _≡_
-data _≡_ {α}{A : Set α}(x : A) : A → Set where
-  refl : x ≡ x
+open import Equality
+open import AlgebraStructures
 
 record Functor (F : Set → Set) : Set₁ where
   constructor mkFunctor
+  infixl 4 _<$>_ _<$_
   field
     fmap : {A B : Set} → (A → B) → F A → F B
     fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
     fmap-∘ : {A B C : Set}{f : A → B}{g : B → C}(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
-
+  _<$>_ : ∀ {A B} → (A → B) → F A → F B
+  _<$>_ = fmap
+  _<$_ : ∀ {A B} → A → F B → F A
+  _<$_ = fmap ∘ const
+  _$>_ : ∀ {A B} → F A → B → F B
+  _$>_ = flip (fmap ∘ const)
 
 record Applicative (F : Set → Set) : Set₁ where
   constructor mkApplicative
-  infixl 2 _<*>_
+  infixl 2 _<*>_ _<**>_ _<*_ _*>_
+  open Functor 
   field
     pure : ∀ {A} → A → F A
     _<*>_ : ∀ {A B} → F (A → B) → F A → F B
@@ -24,6 +29,18 @@ record Applicative (F : Set → Set) : Set₁ where
     <*>-∘ : ∀ {A B C} → (f : F (A → B))(g : F (B → C))(x : F A) → (((pure (λ f g → f ∘ g) <*> g) <*> f) <*> x) ≡ (g <*> (f <*> x))
     hom_law : ∀ {A B}(f : A → B)(x : A) → (pure f <*> pure x) ≡ pure (f x)
     app_pure_law : ∀ {A B}(f : F (A → B))(x : A) → (f <*> pure x) ≡ (pure (λ f → f $ x) <*> f)
+  liftA : ∀ {A B} → (A → B) → F A → F B
+  liftA f x = (pure f) <*> x
+  liftA₂ : ∀ {A B C} → (A → B → C) → F A → F B → F C
+  liftA₂ f x y = (pure f) <*> x <*> y
+  liftA₃ : ∀ {A B C D} → (A → B → C → D) → F A → F B → F C → F D
+  liftA₃ f x y z = (pure f) <*> x <*> y <*> z
+  _<*_ : ∀ {A B} → F A → F B → F A
+  _<*_ = liftA₂ $ const
+  _*>_ : ∀ {A B} → F A → F B → F B
+  x *> y = (liftA₂ $ const id) {!x!} y
+  _<**>_ : ∀ {A B} → F A → F (A → B) → F B
+  _<**>_ = liftA₂ (flip (_$_))
 
 record Traversable (F : Set → Set) (app : Applicative F) : Set₁ where
   constructor mkTraversable
