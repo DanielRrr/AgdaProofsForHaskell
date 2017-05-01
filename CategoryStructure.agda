@@ -1,7 +1,7 @@
 module CategoryStructure where
 
 open import Function
-open import Equality
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
 open import AlgebraStructures
 
 record Functor (F : Set → Set) : Set₁ where
@@ -76,6 +76,7 @@ record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
     unity-left : ∀ {A}(mx : F A) → join (return mx) ≡ mx
     unity-right : ∀ {A}(mx : F A) → join (fmap return mx) ≡ mx
     naturality-return : ∀ {A B} (f : A → F B)(x : A) → return (f x) ≡ fmap f (return x)
+    naturality-join : ∀ {A B}{f : A → F B}(mmx : F ( F A ))→ join (fmap (fmap f) mmx) ≡ fmap f (join mmx)
   bind : ∀ {A B} → (A → F B) → F A → F B
   bind f = join ∘ fmap f
 
