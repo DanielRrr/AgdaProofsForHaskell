@@ -61,26 +61,58 @@ applicativeMaybe = mkApplicative pure (_<*>_) pure-id <*>-∘ hom_law app_pure_l
   app_pure_law Nothing x = refl
   app_pure_law (Just f) x = refl
 
-{-
-monadMaybe : Monad Maybe
-monadMaybe = mkMonad return join -- assoc unity-left unity-right naturality-return where
-  return : ∀ {A} → A → Maybe A
-  return = ?
-    
-  join : ∀ {A} → Maybe (Maybe A) → Maybe A
-  join = ?
 
-  open Functor functor
+monad' = mkMonad return join assoc unity-left unity-right
+                 naturality-return naturality-join
+  where
+    return : {A : Set} → A → Maybe A
+    return = Just
+
+    join : {A : Set} → Maybe (Maybe A) → Maybe A
+    join (Just mx) = mx
+    join Nothing   = Nothing
+
+    open Functor functorMaybe
+
+    assoc : {A : Set} (mmmx : Maybe (Maybe (Maybe A))) →
+                    join (join mmmx) ≡ join (fmap join mmmx)
+    assoc (Just _) = refl
+    assoc Nothing  = refl
+
+    unity-left : {A : Set} (mx : Maybe A) → join (return mx) ≡ mx
+    unity-left _ = refl
+
+    unity-right : {A : Set} (mx : Maybe A) → join (fmap return mx) ≡ mx
+    unity-right (Just _) = refl
+    unity-right Nothing  = refl
+
+    naturality-return : {A B : Set} (f : A → Maybe B) (x : A) →
+                        return (f x) ≡ fmap f (return x)
+    naturality-return f x = refl
+
+    naturality-join : {A B : Set} {f : A → Maybe B} (mmx : Maybe (Maybe A)) →
+                      join (fmap (fmap f) mmx) ≡ fmap f (join mmx)
+    naturality-join Nothing = refl
+    naturality-join (Just x) = refl
+
+kleisliMaybe : KleisliTriple Maybe
+kleisliMaybe = mkKleisli return bind assoc-bind unity-left-bind unity-right-bind
+  where
+    return : ∀ {A} → A → Maybe A
+    return = Just
+
+    bind : ∀ {A B} → (A → Maybe B) → Maybe A → Maybe B
+    bind f Nothing = Nothing
+    bind f (Just x) = f x
+
+    assoc-bind : ∀ {A B C} → (f : A → Maybe B) → (g : B → Maybe C) → (mx : Maybe A) → bind g (bind f mx) ≡ bind (bind g ∘ f) mx
+    assoc-bind f g Nothing = refl
+    assoc-bind f g (Just x) = refl
     
-  assoc : ∀ {A}(3mx : Maybe (Maybe (Maybe A))) → join (join 3mx) ≡ join (fmap join 3mx)
-  assoc = ?
-    
-  unity-left : ∀ {A}(mx : Maybe A) → join (return mx) ≡ mx
-  unity-left = ?
-    
-  unity-right : ∀ {A}(mx : Maybe A) → join (fmap return mx) ≡ mx
-  unity-right = ?
-    
-  naturality-return : ∀ {A B} (f : A → Maybe B)(x : A) → return (f x) ≡ fmap f (return x)
-  naturality-return = ? 
--}
+    unity-left-bind : ∀ {A B} → (f : A → Maybe B) → (x : A) → bind f (return x) ≡ f x
+    unity-left-bind f x = refl
+
+    unity-right-bind : ∀ {A}(mx : Maybe A) → bind return mx ≡ mx
+    unity-right-bind Nothing = refl
+    unity-right-bind (Just x) = {!refl!}
+
