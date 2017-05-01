@@ -59,4 +59,28 @@ applicativeMaybe = mkApplicative pure (_<*>_) pure-id <*>-∘ hom_law app_pure_l
   
   app_pure_law : ∀ {A B}(f : Maybe (A → B))(x : A) → (f <*> pure x) ≡ (pure (λ f → f $ x) <*> f)
   app_pure_law Nothing x = refl
-  app_pure_law (Just f) x = {!refl!}
+  app_pure_law (Just f) x = refl
+
+{-
+monadMaybe : Monad Maybe
+monadMaybe = mkMonad return join -- assoc unity-left unity-right naturality-return where
+  return : ∀ {A} → A → Maybe A
+  return = ?
+    
+  join : ∀ {A} → Maybe (Maybe A) → Maybe A
+  join = ?
+
+  open Functor functor
+    
+  assoc : ∀ {A}(3mx : Maybe (Maybe (Maybe A))) → join (join 3mx) ≡ join (fmap join 3mx)
+  assoc = ?
+    
+  unity-left : ∀ {A}(mx : Maybe A) → join (return mx) ≡ mx
+  unity-left = ?
+    
+  unity-right : ∀ {A}(mx : Maybe A) → join (fmap return mx) ≡ mx
+  unity-right = ?
+    
+  naturality-return : ∀ {A B} (f : A → Maybe B)(x : A) → return (f x) ≡ fmap f (return x)
+  naturality-return = ? 
+-}
