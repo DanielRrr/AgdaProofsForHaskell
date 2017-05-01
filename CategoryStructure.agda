@@ -38,7 +38,7 @@ record Applicative (F : Set → Set) : Set₁ where
   _<*_ : ∀ {A B} → F A → F B → F A
   _<*_ = liftA₂ $ const
   _*>_ : ∀ {A B} → F A → F B → F B
-  x *> y = (liftA₂ $ const id) {!x!} y
+  x *> y = (liftA₂ $ const id) x y
   _<**>_ : ∀ {A B} → F A → F (A → B) → F B
   _<**>_ = liftA₂ (flip (_$_))
 
@@ -58,7 +58,13 @@ record Alternative (F : Set → Set) (app : Applicative F) : Set₁ where
     _<|>_ : ∀ {A} → F A → F A → F A
     empty_unit₁ : ∀ {A}(fx : F A) → (fx <|> empty) ≡ fx
     empty_unit₂ : ∀ {A}(fx : F A) → (empty <|> fx) ≡ fx
-    assoc-<|> : ∀ {A} (fx gx hx : F A) → ((fx <|> gx) <|> hx) ≡ (fx <|> (gx <|> hx)) 
+    assoc-<|> : ∀ {A} (fx gx hx : F A) → ((fx <|> gx) <|> hx) ≡ (fx <|> (gx <|> hx))
+
+record Foldable (T : Set → Set) : Set₁ where
+  constructor mkFoldable
+  field
+    foldMap : ∀ {A M}{AM : Monoid M} → (A → M) → (T A) → M
+    -- foldMaplaw : ∀ {A B M}{AM : Monoid M} → (f : B → M)(g : A → B)(x : T A) → ((foldMap (g ∘ f)) x) ≡ ((g ∘ (foldMap f)) x) 
 
 record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
   constructor mkMonad
@@ -104,3 +110,6 @@ record MonadTrans (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
   open KleisliTriple kl
   field
     lift : ∀ {A}{G : Set → Set}{AG : KleisliTriple G} → G A → F (G A)
+    -- lift₁-law : ∀ {A}{G : Set → Set}{AG : KleisliTriple G}(x : A) → ((lift ∘ return) x) ≡ (return x)
+    lift₂-law : ∀ {A B}{G : Set → Set}{AG : KleisliTriple G} -> (f : A → G B)(x : G A) → (lift (x >>= f)) ≡ ((lift x) >>= (lift ∘ f))
+ 
