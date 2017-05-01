@@ -114,5 +114,5 @@ kleisliMaybe = mkKleisli return bind assoc-bind unity-left-bind unity-right-bind
 
     unity-right-bind : ∀ {A}(mx : Maybe A) → bind return mx ≡ mx
     unity-right-bind Nothing = refl
-    unity-right-bind (Just x) = {!refl!}
+    unity-right-bind (Just x) = refl
 
