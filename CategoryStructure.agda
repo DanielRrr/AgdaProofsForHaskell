@@ -110,6 +110,4 @@ record MonadTrans (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
   open KleisliTriple kl
   field
     lift : ∀ {A}{G : Set → Set}{AG : KleisliTriple G} → G A → F (G A)
-    -- lift₁-law : ∀ {A}{G : Set → Set}{AG : KleisliTriple G}(x : A) → ((lift ∘ return) x) ≡ (return x)
-    lift₂-law : ∀ {A B}{G : Set → Set}{AG : KleisliTriple G} -> (f : A → G B)(x : G A) → (lift (x >>= f)) ≡ ((lift x) >>= (lift ∘ f))
  
