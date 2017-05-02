@@ -22,12 +22,11 @@ record Functor (F : Set → Set) : Set₁ where
 record Applicative (F : Set → Set) : Set₁ where
   constructor mkApplicative
   infixl 2 _<*>_ _<**>_ _<*_ _*>_
-  open Functor 
   field
     pure : ∀ {A} → A → F A
     _<*>_ : ∀ {A B} → F (A → B) → F A → F B
     pure-id : ∀ {A} → (fx : F A) → ((pure id) <*> fx) ≡ fx
-    <*>-∘ : ∀ {A B C} → (f : F (A → B))(g : F (B → C))(x : F A) → (((pure (λ f g → f ∘ g) <*> g) <*> f) <*> x) ≡ (g <*> (f <*> x))
+    <*>-∘ : ∀ {A B C} → (f : F (B → C))(g : F (A → B))(x : F A) → (pure (λ f g → f ∘ g) <*> f <*> g <*> x) ≡ (f <*> (g <*> x)) 
     hom_law : ∀ {A B}(f : A → B)(x : A) → (pure f <*> pure x) ≡ pure (f x)
     app_pure_law : ∀ {A B}(f : F (A → B))(x : A) → (f <*> pure x) ≡ (pure (λ f → f $ x) <*> f)
   liftA : ∀ {A B} → (A → B) → F A → F B
@@ -43,17 +42,11 @@ record Applicative (F : Set → Set) : Set₁ where
   _<**>_ : ∀ {A B} → F A → F (A → B) → F B
   _<**>_ = liftA₂ (flip (_$_))
 
-record Traversable (F : Set → Set) (app : Applicative F) : Set₁ where
-  constructor mkTraversable
-  open Applicative app
-  field
-    traverse : ∀ {A B}{G : Set → Set}{AG : Applicative G} → (A → F B) → G A → F (G B)
-    sequenceA : ∀ {A}{G : Set → Set}{AG : Applicative G} → F (G A) → G (F A)
-
-record Alternative (F : Set → Set) (app : Applicative F) : Set₁ where
+record Alternative (F : Set → Set){{FF : Functor F}}{{app : Applicative F}} : Set₁ where
   constructor mkAlternative
   infixl 3 _<|>_
   open Applicative app
+  open Functor FF
   field
     empty : ∀ {A} → F A
     _<|>_ : ∀ {A} → F A → F A → F A
