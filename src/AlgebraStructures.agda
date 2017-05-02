@@ -23,7 +23,7 @@ record Monoid (A : Set) : Set where
     _●_ : A → A → A
     ε-unit₁ : (x : A) → (x ● ε) ≡ x
     ε-unit₂ : (x : A) → x ≡ (x ● ε)
-    assoc-Monoid : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
+    assoc-semigroup : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
 
 record Group (A : Set){{AG : Monoid A}} : Set where
   constructor mkGroup
