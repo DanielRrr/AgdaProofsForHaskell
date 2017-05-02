@@ -27,7 +27,7 @@ record Monoid (A : Set) : Set where
 
 record Group (A : Set){{AG : Monoid A}} : Set where
   constructor mkGroup
-  open Monoid AG
+  open Monoid {{...}}
   field
     inv : A → A
     inv-axiom₁ : (a : A) → ((inv a) ● a) ≡ ε
@@ -35,14 +35,14 @@ record Group (A : Set){{AG : Monoid A}} : Set where
 
 record Abelian (A : Set){{AM : Monoid A}}{{AG : Group A}} : Set where
   constructor mkAbelian
-  open Monoid AM
-  open Group AG
+  open Monoid {{...}}
+  open Group {{...}}
   field
     commute : (a b : A) → (a ● b) ≡ (b ● a)
 
 record AbelianMonoid (A : Set){{AM : Monoid A}} : Set where
  constructor mkAbelianMonoid
- open Monoid AM
+ open Monoid {{...}}
  field
    commute : (a b : A) → (a ● b) ≡ (b ● a)
 
@@ -66,20 +66,20 @@ record Ring (A : Set) : Set where
 
 record LeeRing (A : Set){{R : Ring A}} : Set where
   constructor mkLeeRing
-  open Ring R
+  open Ring {{...}}
   field
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
     leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (a · c)) + (c · (a · b))) ≡ θ
 
 record BoolRing (A : Set){{R : Ring A}} : Set where
   constructor mkBoolRing
-  open Ring R
+  open Ring {{...}}
   field
     imdepotency : (a : A) → (a · a) ≡ a
 
 record RingWithOne (A : Set){{R : Ring A}} : Set where
   constructor mkAssocRingWithOne
-  open Ring R
+  open Ring {{...}}
   field
     ε : A
     ·-unit₁ : (a : A) → (a · ε) ≡ a
@@ -87,7 +87,7 @@ record RingWithOne (A : Set){{R : Ring A}} : Set where
 
 record CommutativeRing (A : Set){{R : Ring A}} : Set where
   constructor mkCommutativeRing
-  open Ring R
+  open Ring {{...}}
   field
     com-· : (a b : A) → (a · b) ≡ (b · a)
 
@@ -96,8 +96,8 @@ record ComRingWithOne (A : Set){{R : Ring A}}{{OA : RingWithOne A}}{{CA : Commut
 
 record DivisionRing (A : Set){{R : Ring A}}{{OA : RingWithOne A}} : Set where
   constructor mkDivisionRing
-  open Ring R
-  open RingWithOne OA
+  open Ring {{...}}
+  open RingWithOne {{...}}
   field
     invTimes : A → A
     inv-·₁ : (a : A) → (a · (invTimes a)) ≡ ε
