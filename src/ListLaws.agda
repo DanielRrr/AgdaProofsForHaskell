@@ -35,7 +35,7 @@ monoidList = mkMonoid ε _●_  ε-unit₁  ε-unit₂ assoc-Monoid where
   
   ε-unit₂ : ∀ {A} → (x : List A) → x ≡ (x ● [])
   ε-unit₂ [] = refl
-  ε-unit₂ (x ∷ xs) = cong (_∷_ x) {!ε-unit₂ xs!}
+  ε-unit₂ (x ∷ xs) = cong (_∷_ x) (ε-unit₂ xs)
   
   assoc-Monoid : ∀ {A} → (x y z : List A) → ((x ● y) ● z) ≡ (x ● (y ● z))
   assoc-Monoid [] ys zs = refl
