@@ -40,3 +40,10 @@ monoidList = mkMonoid ε _●_  ε-unit₁  ε-unit₂ assoc-Monoid where
   assoc-Monoid : ∀ {A} → (x y z : List A) → ((x ● y) ● z) ≡ (x ● (y ● z))
   assoc-Monoid [] ys zs = refl
   assoc-Monoid (x ∷ xs) ys zs = cong (_∷_ x) (assoc-Monoid xs ys zs)
+
+applicativeList : Applicative List
+applicativeList = mkApplicative {!!} {!!} {!!} {!!} {!!} {!!}
+
+
+kleisliList : KleisliTriple List
+kleisliList = {!!}
