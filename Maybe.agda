@@ -1,6 +1,7 @@
 module Maybe where
 
-open import Equality
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
+open import AlgebraStructures
 open import CategoryStructure
 open import Function
 open import UnitAndEmpty
@@ -61,8 +62,7 @@ applicativeMaybe = mkApplicative pure (_<*>_) pure-id <*>-∘ hom_law app_pure_l
   app_pure_law Nothing x = refl
   app_pure_law (Just f) x = refl
 
-
-monad' = mkMonad return join assoc unity-left unity-right
+monadMaybe = mkMonad return join assoc unity-left unity-right
                  naturality-return naturality-join
   where
     return : {A : Set} → A → Maybe A
@@ -115,4 +115,3 @@ kleisliMaybe = mkKleisli return bind assoc-bind unity-left-bind unity-right-bind
     unity-right-bind : ∀ {A}(mx : Maybe A) → bind return mx ≡ mx
     unity-right-bind Nothing = refl
     unity-right-bind (Just x) = refl
-

@@ -104,7 +104,8 @@ record MonadPlus (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
     mzero : ∀ {A} → F A
     mplus : ∀ {A} → F A → F A → F A
     mzero-unit₁ : ∀ {A}(mx : F A) → (mplus mzero mx) ≡ mx
-    mzero-unit₂ : ∀ {A}(fx gx hx : F A) → (mplus (mplus fx gx) hx) ≡ (mplus fx (mplus gx hx))
+    mzero-unit₂ : ∀ {A}(mx : F A) → (mplus mx mzero) ≡ mx
+    assoc : ∀ {A}(fx gx hx : F A) → (mplus (mplus fx gx) hx) ≡ (mplus fx (mplus gx hx))
 
 record MonadTrans (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
   constructor mkMonadTrans

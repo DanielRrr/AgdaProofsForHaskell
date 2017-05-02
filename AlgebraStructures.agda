@@ -1,6 +1,6 @@
 module AlgebraStructures where
 
-open import Equality
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
 
 record Monoid (A : Set) : Set where
   constructor mkMonoid
