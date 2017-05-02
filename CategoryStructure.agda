@@ -3,6 +3,7 @@ module CategoryStructure where
 open import Function
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
 open import AlgebraStructures
+open import Identity
 
 record Functor (F : Set → Set) : Set₁ where
   constructor mkFunctor
@@ -112,4 +113,8 @@ record MonadTrans (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
   open KleisliTriple kl
   field
     lift : ∀ {A}{G : Set → Set}{AG : KleisliTriple G} → G A → F (G A)
- 
+
+
+{- data Compose (A : Set)(F G : Set → Set) : Set₁ where
+  compose : F (G A) → Compose F G A
+  getCompose : Compose F G A → F (G A) -}
