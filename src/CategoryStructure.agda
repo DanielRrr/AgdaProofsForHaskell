@@ -48,19 +48,19 @@ open Applicative{{...}} public
 
 record ApplicativeSatisfies F {{AF : Applicative F}} : Set₁ where
   field
-    pure-id : ∀ {A} → (fx : F A) → ((pure id) <*> fx) ≡ fx
-    <*>-∘ : ∀ {A B C} → (f : F (B → C))(g : F (A → B))(x : F A) → (pure {{AF}} (λ f g → f ∘ g) <*> f <*> g <*> x) ≡ (f <*> (g <*> x)) 
-    hom_law : ∀ {A B}{f : A → B}{x : A} → ((pure {{AF}} f) <*> (pure x)) ≡ pure (f x)
-    app_pure_law : ∀ {A B}{f : F (A → B)}(x : A) → (f <*> pure x) ≡ (pure (λ f → f $ x) <*> f)
+    lawId : ∀ {X} (x : F X) → (pure {{AF}} id <*> x) ≡ x
+    lawCo : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (pure {{AF}} (λ f g → f ∘ g) <*> f  <*> g  <*> r) ≡ (f <*> (g <*> r))
+    lawHom : ∀ {S T} (f : S → T)(s : S) → (pure {{AF}} f <*> pure s) ≡ (pure (f s))
+    lawCom : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure {{AF}} (λ f → f s) <*> f)
   FunSatisifesApp : FunctorSatisfies F {{ appFunctor}}
   FunSatisifesApp = record {
-    fmap-id = pure-id ;
+    fmap-id = lawId ;
     fmap-∘ = λ f g x → begin
-      {!!} }
+      {!!}
+    }
 open ApplicativeSatisfies{{...}} public
 
 record Alternative (F : Set → Set){{FF : Functor F}}{{app : Applicative F}} : Set₁ where
-  constructor mkAlternative
   infixl 3 _<|>_
   open Applicative app
   open Functor FF
@@ -70,12 +70,12 @@ record Alternative (F : Set → Set){{FF : Functor F}}{{app : Applicative F}} : 
     empty_unit₁ : ∀ {A}(fx : F A) → (fx <|> empty) ≡ fx
     empty_unit₂ : ∀ {A}(fx : F A) → (empty <|> fx) ≡ fx
     assoc-<|> : ∀ {A} (fx gx hx : F A) → ((fx <|> gx) <|> hx) ≡ (fx <|> (gx <|> hx))
+open Alternative{{...}} public
 
 record Foldable (T : Set → Set) : Set₁ where
   constructor mkFoldable
   field
-    foldMap : ∀ {A M}{AM : Monoid M} → (A → M) → (T A) → M
-    -- foldMaplaw : ∀ {A B M}{AM : Monoid M} → (f : B → M)(g : A → B)(x : T A) → ((foldMap (g ∘ f)) x) ≡ ((g ∘ (foldMap f)) x) 
+    foldr : ∀ {A B : Set} → (A → B → B) → B → T A → B 
 
 record Monad (F : Set → Set) {{functor : Functor F}} : Set₁ where
   constructor mkMonad
