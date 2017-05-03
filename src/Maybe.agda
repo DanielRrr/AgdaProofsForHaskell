@@ -45,7 +45,7 @@ applicativeMaybe = mkApplicative pure (_<*>_) pure-id <*>-∘ hom_law app_pure_l
   pure-id Nothing = refl
   pure-id (Just x) = refl
   
-  <*>-∘ : ∀ {A B C} → (f : Maybe (A → B))(g : Maybe (B → C))(x : Maybe A) → (((pure (λ f g → f ∘ g) <*> g) <*> f) <*> x) ≡ (g <*> (f <*> x))
+  <*>-∘ : ∀ {A B C} → (f : Maybe (B → C))(g : Maybe (A → B))(x : Maybe A) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> x) ≡ (f <*> (g <*> x)) 
   <*>-∘ Nothing Nothing Nothing = refl
   <*>-∘ Nothing Nothing (Just x) = refl
   <*>-∘ Nothing (Just f) Nothing = refl
@@ -62,9 +62,11 @@ applicativeMaybe = mkApplicative pure (_<*>_) pure-id <*>-∘ hom_law app_pure_l
   app_pure_law Nothing x = refl
   app_pure_law (Just f) x = refl
 
-monadMaybe = mkMonad return join assoc unity-left unity-right
-                 naturality-return naturality-join
+monad = mkMonad return join assoc unity-left unity-right naturality-return naturality-join
   where
+  
+    open Functor functorMaybe 
+
     return : {A : Set} → A → Maybe A
     return = Just
 
@@ -72,10 +74,7 @@ monadMaybe = mkMonad return join assoc unity-left unity-right
     join (Just mx) = mx
     join Nothing   = Nothing
 
-    open Functor functorMaybe
-
-    assoc : {A : Set} (mmmx : Maybe (Maybe (Maybe A))) →
-                    join (join mmmx) ≡ join (fmap join mmmx)
+    assoc : {A : Set} (mmmx : Maybe (Maybe (Maybe A))) → join (join mmmx) ≡ join (fmap join mmmx)
     assoc (Just _) = refl
     assoc Nothing  = refl
 

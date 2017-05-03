@@ -60,7 +60,7 @@ record Foldable (T : Set → Set) : Set₁ where
     foldMap : ∀ {A M}{AM : Monoid M} → (A → M) → (T A) → M
     -- foldMaplaw : ∀ {A B M}{AM : Monoid M} → (f : B → M)(g : A → B)(x : T A) → ((foldMap (g ∘ f)) x) ≡ ((g ∘ (foldMap f)) x) 
 
-record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
+record Monad (F : Set → Set) {{functor : Functor F}} : Set₁ where
   constructor mkMonad
   open Functor functor using (fmap)
   field
