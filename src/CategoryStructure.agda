@@ -46,19 +46,21 @@ record Applicative (F : Set → Set) : Set₁ where
   _<**>_ = liftA₂ (flip (_$_))
 open Applicative{{...}} public
 
-record ApplicativeSatisfies F {{AF : Applicative F}} : Set₁ where
+record ApplicativeOKP F {{AF : Applicative F}} : Set₁ where
   field
     lawId : ∀ {X} (x : F X) → (pure {{AF}} id <*> x) ≡ x
-    lawCo : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (pure {{AF}} (λ f g → f ∘ g) <*> f  <*> g  <*> r) ≡ (f <*> (g <*> r))
+    lawCo : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (pure {{AF}} (λ f g → f ∘ g) <*> f <*> g <*> r) ≡ (f <*> (g <*> r))
     lawHom : ∀ {S T} (f : S → T)(s : S) → (pure {{AF}} f <*> pure s) ≡ (pure (f s))
     lawCom : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure {{AF}} (λ f → f s) <*> f)
-  FunSatisifesApp : FunctorSatisfies F {{ appFunctor}}
-  FunSatisifesApp = record {
-    fmap-id = lawId ;
-    fmap-∘ = λ f g x → begin
-      {!!}
+
+  applicativeEndoFunctorOKP : FunctorSatisfies F {{appFunctor}}
+  applicativeEndoFunctorOKP = record
+    { fmap-id = lawId
+    ; fmap-∘ = λ f g r →
+      begin 
+        {!!}
     }
-open ApplicativeSatisfies{{...}} public
+open ApplicativeOKP{{...}} public 
 
 record Alternative (F : Set → Set){{FF : Functor F}}{{app : Applicative F}} : Set₁ where
   infixl 3 _<|>_
