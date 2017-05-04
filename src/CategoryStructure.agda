@@ -6,6 +6,7 @@ open import AlgebraStructures
 open import Identity
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
+
 record Functor (F : Set → Set) : Set₁ where
   infixl 4 _<$>_ _<$_
   field
