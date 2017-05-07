@@ -1,38 +1,36 @@
 module CategoryStructure where
 
 open import Function
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym)
 open import AlgebraStructures
 open import Identity
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 
 record Functor (F : Set → Set) : Set₁ where
-  infixl 4 _<$>_ _<$_
+  constructor mkFunctor
+  infixl 4 _<$>_ _<$_ _$>_
   field
     fmap : {A B : Set} → (A → B) → F A → F B
+    fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
+    fmap-∘ : {A B C : Set}{g : B → C}{f : A → B}(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
   _<$>_ : ∀ {A B} → (A → B) → F A → F B
   _<$>_ = fmap
   _<$_ : ∀ {A B} → A → F B → F A
   _<$_ = fmap ∘ const
   _$>_ : ∀ {A B} → F A → B → F B
   _$>_ = flip (fmap ∘ const)
-open Functor{{...}} public
-
-record FunctorSatisfies F {{FF : Functor F }} : Set₁ where
-  field
-    fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
-    fmap-∘ : {A B C : Set}(f : B → C)(g : A → B)(fx : F A) → fmap (f ∘ g) fx ≡ (fmap f ∘ fmap g) fx
-open FunctorSatisfies{{...}} public
 
 record Applicative (F : Set → Set) : Set₁ where
+  constructor mkApplicative
   infixl 2 _<*>_ _<**>_ _<*_ _*>_
   field
     pure : ∀ {A} → A → F A
     _<*>_ : ∀ {A B} → F (A → B) → F A → F B
-  appFunctor : Functor F
-  appFunctor = record {
-    fmap = _<*>_ ∘ pure  }
+    pure-id : ∀ {X} (x : F X) → (pure id <*> x) ≡ x
+    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (pure (λ f g → f ∘ g) <*> f <*> g <*> r) ≡ (f <*> (g <*> r))
+    pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
+    pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
   liftA : ∀ {A B} → (A → B) → F A → F B
   liftA f x = (pure f) <*> x
   liftA₂ : ∀ {A B C} → (A → B → C) → F A → F B → F C
@@ -44,44 +42,39 @@ record Applicative (F : Set → Set) : Set₁ where
   _*>_ : ∀ {A B} → F A → F B → F B
   x *> y = (liftA₂ $ const id) x y
   _<**>_ : ∀ {A B} → F A → F (A → B) → F B
-  _<**>_ = liftA₂ (flip (_$_))
-open Applicative{{...}} public
+  _<**>_ = flip _<*>_
+  functor : Functor F
+  functor = mkFunctor fmap fmap-id fmap-∘ where
+    fmap : ∀ {A B} → (A → B) → F A → F B
+    fmap f x = (pure f) <*> x
 
-record ApplicativeOKP F {{AF : Applicative F}} : Set₁ where
-  field
-    lawId : ∀ {X} (x : F X) → (pure {{AF}} id <*> x) ≡ x
-    lawCo : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (pure {{AF}} (λ f g → f ∘ g) <*> f <*> g <*> r) ≡ (f <*> (g <*> r))
-    lawHom : ∀ {S T} (f : S → T)(s : S) → (pure {{AF}} f <*> pure s) ≡ (pure (f s))
-    lawCom : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure {{AF}} (λ f → f s) <*> f)
+    fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
+    fmap-id = pure-id
+    
+    fmap-∘ : ∀ {A B C}{g : B → C}{f : A → B}(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
+    fmap-∘ {g} {f = f} x = sym $ begin
+      {!   (pure g <*> (pure f <*> x))
+            ≡⟨ sym (pure-∘ (pure g) (pure f) x) ⟩
+          ((pure (λ g f → g ∘ f)) <*> ((pure g) <*> ((pure f) <*> x)))
+            ≡⟨ cong (λ x → x <*> pure f <*> x) (pure-hom (λ g f → g ∘ f) g) ⟩
+          (pure (λ f → g ∘ f) <*> (pure f <*> x))
+            ≡⟨ cong (λ x → x <*> x) (pure-hom (λ f → g ∘ f) f) ⟩
+          (pure (λ x → g (f x)) <*> x)
+        ∎!}
 
-  applicativeEndoFunctorOKP : FunctorSatisfies F {{appFunctor}}
-  applicativeEndoFunctorOKP = record
-    { fmap-id = lawId
-    ; fmap-∘ = λ f g r →
-      begin 
-        {!!}
-    }
-open ApplicativeOKP{{...}} public 
 
-record Alternative (F : Set → Set){{FF : Functor F}}{{app : Applicative F}} : Set₁ where
-  infixl 3 _<|>_
-  open Applicative app
-  open Functor FF
-  field
-    empty : ∀ {A} → F A
-    _<|>_ : ∀ {A} → F A → F A → F A
-    empty_unit₁ : ∀ {A}(fx : F A) → (fx <|> empty) ≡ fx
-    empty_unit₂ : ∀ {A}(fx : F A) → (empty <|> fx) ≡ fx
-    assoc-<|> : ∀ {A} (fx gx hx : F A) → ((fx <|> gx) <|> hx) ≡ (fx <|> (gx <|> hx))
-open Alternative{{...}} public
+_⇒_ : ∀ (F G : Set → Set) → Set₁
+F ⇒ G = ∀ {X} → F X → G X
+   
 
 record Foldable (T : Set → Set) : Set₁ where
   constructor mkFoldable
   field
     foldr : ∀ {A B : Set} → (A → B → B) → B → T A → B 
 
-record Monad (F : Set → Set) {{functor : Functor F}} : Set₁ where
+record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
   constructor mkMonad
+  open Functor functor using (fmap)
   field
     return : ∀ {A} → A → F A
     join : ∀ {A} → F (F A) → F A
@@ -91,10 +84,10 @@ record Monad (F : Set → Set) {{functor : Functor F}} : Set₁ where
     naturality-return : ∀ {A B} (f : A → F B)(x : A) → return (f x) ≡ fmap f (return x)
     naturality-join : ∀ {A B}{f : A → F B}(mmx : F ( F A ))→ join (fmap (fmap f) mmx) ≡ fmap f (join mmx)
   bind : ∀ {A B} → (A → F B) → F A → F B
-  bind f = join ∘ fmap f
+  bind f = join ∘ fmap f 
 
 record KleisliTriple (F : Set → Set) : Set₁ where
-  constructor mkKleisli 
+  constructor mkKleisli
   field
     return : ∀ {A} → A → F A
     bind : ∀ {A B} → (A → F B) → F A → F B
