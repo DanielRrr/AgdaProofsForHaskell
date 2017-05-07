@@ -1,6 +1,6 @@
 module AlgebraStructures where
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym)
 
 record Magma (A : Set) : Set where
   constructor mkMagma
@@ -24,20 +24,30 @@ record Monoid (A : Set) : Set where
     ε-unit₁ : (x : A) → (x ● ε) ≡ x
     ε-unit₂ : (x : A) → x ≡ (x ● ε)
     assoc-Monoid : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
+  semiA : Semigroup A
+  semiA = mkSemigroup _●_ assoc-Monoid
 
-record Group (A : Set){{AG : Monoid A}} : Set where
+record Group (A : Set) : Set where
   constructor mkGroup
-  open Monoid {{...}}
   field
+    ε : A
+    _●_ : A → A → A
+    ε-unit₁ : (x : A) → (x ● ε) ≡ x
+    ε-unit₂ : (x : A) → x ≡ (x ● ε)
+    assoc-Monoid : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
     inv : A → A
     inv-axiom₁ : (a : A) → ((inv a) ● a) ≡ ε
     inv-axiom₁ : (a : A) → (a ● (inv a)) ≡ ε
 
-record Abelian (A : Set){{AM : Monoid A}}{{AG : Group A}} : Set where
+record Abelian (A : Set) : Set where
   constructor mkAbelian
-  open Monoid {{...}}
-  open Group {{...}}
   field
+    ε : A
+    _●_ : A → A → A
+    ε-unit : (x : A) → (x ● ε) ≡ x
+    assoc-Monoid : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
+    inv : A → A
+    inv-axiom : (a : A) → ((inv a) ● a) ≡ ε
     commute : (a b : A) → (a ● b) ≡ (b ● a)
 
 record AbelianMonoid (A : Set){{AM : Monoid A}} : Set where
@@ -55,14 +65,24 @@ record Ring (A : Set) : Set where
       invPlus : A → A
       _+_ : A → A → A
       _·_ : A → A → A
-      +-assoc : (a b c : A) → (a + (b + c)) ≡ ((a + b) + c)
+      +-assoc : (a b c : A) → ((a + b) + c) ≡ (a + (b + c))
       +-commute : (a b : A) → (a + b) ≡ (b + a)
-      +-inv : (a : A) → (a + (invPlus a)) ≡ θ
+      +-inv : (a : A) → ((invPlus a) + a) ≡ θ
       +-θ : (a : A) → (a + θ) ≡ a
       ·-distr-left : (a b c : A) → ((a + b) · c) ≡ ((a · c) + (b · c))
       ·-distr-right : (a b c : A) → (a · (b + c)) ≡ ((a · b) + (a · c))
-      ·-assoc : (a b c : A) → (a · (b · c)) ≡ ((a · b) · c)
+      ·-assoc : (a b c : A) → ((a · b) · c) ≡ (a · (b · c))
       associator : A → A → A → A
+  semiA : Semigroup A
+  semiA = mkSemigroup _·_ ·-assoc
+  monA : Monoid A
+  monA = mkMonoid θ _+_ +-θ θ-unit +-assoc where
+    θ-unit : (x : A) → x ≡ (x + θ)
+    θ-unit x = sym (+-θ x)
+  abA : Abelian A
+  abA = mkAbelian θ _+_ +-θ +-assoc invPlus +-inv +-commute
+  
+
 
 record LeeRing (A : Set){{R : Ring A}} : Set where
   constructor mkLeeRing
