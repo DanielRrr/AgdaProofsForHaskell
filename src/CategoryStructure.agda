@@ -13,7 +13,7 @@ record Functor (F : Set → Set) : Set₁ where
   field
     fmap : {A B : Set} → (A → B) → F A → F B
     fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
-    fmap-∘ : {A B C : Set}{g : B → C}{f : A → B}(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
+    fmap-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
   _<$>_ : ∀ {A B} → (A → B) → F A → F B
   _<$>_ = fmap
   _<$_ : ∀ {A B} → A → F B → F A
@@ -51,16 +51,12 @@ record Applicative (F : Set → Set) : Set₁ where
     fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
     fmap-id = pure-id
     
-    fmap-∘ : ∀ {A B C}{g : B → C}{f : A → B}(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
-    fmap-∘ {g} {f = f} x = sym $ begin
-      {!   (pure g <*> (pure f <*> x))
-            ≡⟨ sym (pure-∘ (pure g) (pure f) x) ⟩
-          ((pure (λ g f → g ∘ f)) <*> ((pure g) <*> ((pure f) <*> x)))
-            ≡⟨ cong (λ x → x <*> pure f <*> x) (pure-hom (λ g f → g ∘ f) g) ⟩
-          (pure (λ f → g ∘ f) <*> (pure f <*> x))
-            ≡⟨ cong (λ x → x <*> x) (pure-hom (λ f → g ∘ f) f) ⟩
-          (pure (λ x → g (f x)) <*> x)
-        ∎!}
+    fmap-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
+    fmap-∘ g f x = sym $ begin
+      _<*>_ (pure g) (_<*>_ (pure f) x) ≡⟨ sym (pure-∘ (pure g) (pure f) x) ⟩
+      _<*>_ (_<*>_ (_<*>_ (pure (λ f g → f ∘ g)) (pure g)) (pure f)) x ≡⟨ cong (λ fx → fx <*> pure f <*> x) (pure-hom (λ g f → g ∘ f) g) ⟩
+      (_<*>_ (_<*>_ (pure (λ f → g ∘ f)) (pure f)) x) ≡⟨ cong (λ fx → fx <*> x) (pure-hom (λ f → g ∘ f) f) ⟩
+      refl
 
 
 _⇒_ : ∀ (F G : Set → Set) → Set₁
