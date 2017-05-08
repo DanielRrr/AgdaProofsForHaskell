@@ -110,14 +110,7 @@ record KleisliTriple (F : Set → Set) : Set₁ where
     liftM-id x = begin ((liftM id x) ≡⟨ unity-right-bind x ⟩ refl)
   
     liftM-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → liftM (g ∘ f) fx ≡ (liftM g ∘ liftM f) fx
-    liftM-∘ g f x = sym $ begin
-      (((liftM g ∘ liftM f) x)
-      ≡⟨ assoc-bind ((λ y → return (f y))) (λ z → return (g z)) x ⟩
-      bind (λ x → bind ((λ z → return (g z))) (return (f x))) x
-      ≡⟨ sym (assoc-bind (λ y → return (f y)) (λ z → return (g z)) x) ⟩
-      (bind (λ z → return (g z)) (bind (λ y → return (f y)) x))
-      ≡⟨ (assoc-bind (λ y → return (f y)) (λ z → return (g z)) x) ⟩
-      {!!} ≡⟨ {!!} ⟩ {!!})
+    liftM-∘ g f x = {!!}
   
   appF : Applicative F
   appF = mkApplicative pure _<*>_ pure-id pure-∘ pure-hom pure-inter where
@@ -135,11 +128,16 @@ record KleisliTriple (F : Set → Set) : Set₁ where
             refl)
     
     pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ f g x = begin
-      ((((pure (λ f g → f ∘ g) <*> f) <*> g) <*> x)) ≡⟨ assoc-bind (λ g₁ → {!!}) {!!} {!!} ⟩ {!!}
+    pure-∘ f g r = {!!}
+
     
     pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
-    pure-hom f s = begin ((pure f <*> pure s) ≡⟨ {!!} ⟩ {!!})
+    pure-hom f s = begin
+                 ((pure f <*> pure s)
+                 ≡⟨ unity-left-bind (λ f → bind (λ x → return (f x)) (return s)) f ⟩
+                 bind (λ x → return (f x)) (return s)
+                 ≡⟨ unity-left-bind (λ x → return (f x)) s ⟩
+                 refl)
     
     pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
     pure-inter f s = {!!}
@@ -153,7 +151,7 @@ record MonadPlus (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
     mplus : ∀ {A} → F A → F A → F A
     mzero-unit₁ : ∀ {A}(mx : F A) → (mplus mzero mx) ≡ mx
     mzero-unit₂ : ∀ {A}(mx : F A) → (mplus mx mzero) ≡ mx
-    assoc : ∀ {A}(fx gx hx : F A) → (mplus (mplus fx gx) hx) ≡ (mplus fx (mplus gx hx))
+    assoc : ∀ {A}(fx gx hx : F A) → (mplus (mplus fx gx) hx) ≡ (mplus fx (mplus gx hx)) 
 
 record MonadTrans (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
   constructor mkMonadTrans
