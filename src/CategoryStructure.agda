@@ -126,11 +126,7 @@ record KleisliTriple (F : Set → Set) : Set₁ where
             (bind (λ y → return (id y)) x)
             ≡⟨ unity-right-bind x ⟩
             refl)
-    
-    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ f g r = {!!}
 
-    
     pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
     pure-hom f s = begin
                  ((pure f <*> pure s)
@@ -139,6 +135,9 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                  ≡⟨ unity-left-bind (λ x → return (f x)) s ⟩
                  refl)
     
+    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
+    pure-∘ f g r = {!!}
+                   
     pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
     pure-inter f s = {!!}
   
