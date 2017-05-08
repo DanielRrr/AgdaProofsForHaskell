@@ -2,7 +2,6 @@ module CategoryStructure where
 
 open import Function
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans)
-open import AlgebraStructures
 open import Identity
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
@@ -104,23 +103,46 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   mx >> my = mx >>= (const my)
   liftM : ∀ {A B} → (A → B) → F A → F B
   liftM f x = bind (λ x → return (f x)) x
+  funF : Functor F
+  funF = mkFunctor liftM liftM-id liftM-∘ where
+
+    liftM-id : {A : Set}(fx : F A) → liftM id fx ≡ id fx
+    liftM-id x = begin ((liftM id x) ≡⟨ unity-right-bind x ⟩ refl)
+  
+    liftM-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → liftM (g ∘ f) fx ≡ (liftM g ∘ liftM f) fx
+    liftM-∘ g f x = sym $ begin
+      (((liftM g ∘ liftM f) x)
+      ≡⟨ assoc-bind ((λ y → return (f y))) (λ z → return (g z)) x ⟩
+      bind (λ x → bind ((λ z → return (g z))) (return (f x))) x
+      ≡⟨ sym (assoc-bind (λ y → return (f y)) (λ z → return (g z)) x) ⟩
+      (bind (λ z → return (g z)) (bind (λ y → return (f y)) x))
+      ≡⟨ (assoc-bind (λ y → return (f y)) (λ z → return (g z)) x) ⟩
+      {!!} ≡⟨ {!!} ⟩ {!!})
+  
   appF : Applicative F
   appF = mkApplicative pure _<*>_ pure-id pure-∘ pure-hom pure-inter where
     pure : ∀ {A} → A → F A
     pure = return
     _<*>_ : ∀ {A B} → F (A → B) → F A → F B
     _<*>_ fm x = fm >>= (λ f → x >>= λ s → return (f s) )
+    
     pure-id : ∀ {X} (x : F X) → (pure id <*> x) ≡ x
-    pure-id x = {!!}
+    pure-id x = begin
+            ((pure id <*> x)
+            ≡⟨ unity-left-bind (λ f → bind (λ y → return (f y)) x) id ⟩
+            (bind (λ y → return (id y)) x)
+            ≡⟨ unity-right-bind x ⟩
+            refl)
     
     pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ f g x = sym $ begin {!!}
+    pure-∘ f g x = begin
+      ((((pure (λ f g → f ∘ g) <*> f) <*> g) <*> x)) ≡⟨ assoc-bind (λ g₁ → {!!}) {!!} {!!} ⟩ {!!}
     
     pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
-    pure-hom f s = ?
+    pure-hom f s = begin ((pure f <*> pure s) ≡⟨ {!!} ⟩ {!!})
     
     pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
-    pure-inter f s = ?
+    pure-inter f s = {!!}
   
   
 record MonadPlus (F : Set → Set) (kl : KleisliTriple F) : Set₁ where

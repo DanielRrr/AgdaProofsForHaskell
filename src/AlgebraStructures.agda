@@ -41,6 +41,8 @@ record Group (A : Set) : Set where
     inv : A → A
     inv-axiom₁ : (a : A) → (inv a ● a) ≡ ε
     inv-axiom₂ : (a : A) → (a ● (inv a)) ≡ ε
+  commutator : (a b : A) → A
+  commutator a b = (inv a) ● (inv b) ● a ● b
   mult : A → A → A
   mult x y = x ● y
   semiA : Semigroup A
@@ -77,6 +79,7 @@ record Group (A : Set) : Set where
   
   jacketShirt : (a b : A) → (inv (a ● b)) ≡ ((inv b) ● (inv a))
   jacketShirt a b = {!!}
+open Group {{...}} public
   
 record Abelian (A : Set) : Set where
   constructor mkAbelian
@@ -88,12 +91,6 @@ record Abelian (A : Set) : Set where
     inv : A → A
     inv-axiom : (a : A) → ((inv a) ● a) ≡ ε
     commute : (a b : A) → (a ● b) ≡ (b ● a)
-
-record AbelianMonoid (A : Set){{AM : Monoid A}} : Set where
- constructor mkAbelianMonoid
- open Monoid {{...}}
- field
-   commute : (a b : A) → (a ● b) ≡ (b ● a)
 
 record Ring (A : Set) : Set where
   constructor mkRing
@@ -112,10 +109,6 @@ record Ring (A : Set) : Set where
       ·-distr-left : (a b c : A) → ((a + b) · c) ≡ ((a · c) + (b · c))
       ·-distr-right : (a b c : A) → (a · (b + c)) ≡ ((a · b) + (a · c))
       ·-assoc : (a b c : A) → ((a · b) · c) ≡ (a · (b · c))
-  semiA : Semigroup A
-  semiA = mkSemigroup _·_ ·-assoc
-  monA : Monoid A
-  monA = mkMonoid θ _+_ +-θ θ-unit +-assoc where
   abA : Abelian A
   abA = mkAbelian θ _+_ +-θ +-assoc invPlus +-inv +-commute
   
@@ -128,7 +121,7 @@ record LeeRing (A : Set){{R : Ring A}} : Set where
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
     leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (a · c)) + (c · (a · b))) ≡ θ
   anticommute : (a b : A) → (a · b) ≡ ((invPlus b) · a)
-  anticommute a b = {!!}
+  anticommute a b = begin ((a · b) ≡⟨ {!!} ⟩ {!!})
 
 record BoolRing (A : Set){{R : Ring A}} : Set where
   constructor mkBoolRing
@@ -153,7 +146,7 @@ record CommutativeRing (A : Set){{R : Ring A}} : Set where
 record ComRingWithOne (A : Set){{R : Ring A}}{{OA : RingWithOne A}}{{CA : CommutativeRing A}} : Set where
   constructor mkComRingWithOne
 
-record DivisionRing (A : Set){{R : Ring A}}{{OA : RingWithOne A}} : Set where
+{- record DivisionRing (A : Set){{R : Ring A}}{{OA : RingWithOne A}} : Set where
   constructor mkDivisionRing
   open Ring {{...}}
   open RingWithOne {{...}}
@@ -164,5 +157,5 @@ record DivisionRing (A : Set){{R : Ring A}}{{OA : RingWithOne A}} : Set where
 
 record Field (A : Set){{R : Ring A}}{{OA : RingWithOne A}}{{DA : DivisionRing A}}{{CA : CommutativeRing A }} : Set where
   constructor mkField
-
+-}
 
