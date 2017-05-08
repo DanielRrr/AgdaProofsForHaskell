@@ -134,12 +134,20 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                  bind (λ x → return (f x)) (return s)
                  ≡⟨ unity-left-bind (λ x → return (f x)) s ⟩
                  refl)
-    
-    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ f g r = {!!}
-                   
+                 
     pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
-    pure-inter f s = {!!}
+    pure-inter f s = begin
+               {!!}
+               ≡⟨ {!!} ⟩ {!!}
+
+    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
+    pure-∘ f g r = begin
+             ((bind (λ a → bind (λ b → return (a b)) r) (bind (λ c → bind (λ d → return (λ e → c d e)) g) (bind (λ h → bind (λ i → return (λ j → λ k → h i j k)) f)
+             (return (λ l → λ m → λ n → l (m n))))))
+             ≡⟨ assoc-bind (λ j → bind (λ k → return (λ l → j k l)) g) (λ a → bind (λ b → return (a b)) r)
+             (bind (λ h → bind (λ q → return (λ u → λ k → h q u k)) f) (return (λ a b c → (a ∘ b) c))) ⟩
+             bind (λ a → bind (λ b → bind (λ c → return (b c)) r) (bind (λ d → return {!!}) {!!})) {!!} ≡⟨ {!!} ⟩ {!!})
+                   
   
   
 record MonadPlus (F : Set → Set) (kl : KleisliTriple F) : Set₁ where
