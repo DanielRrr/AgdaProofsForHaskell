@@ -1,7 +1,7 @@
 module CategoryStructure where
 
 open import Function
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans; subst)
 open import Identity
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
@@ -83,7 +83,25 @@ record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
     naturality-join : ∀ {A B}{f : A → F B}(mmx : F ( F A ))→ join (fmap (fmap f) mmx) ≡ fmap f (join mmx)
   bind : ∀ {A B} → (A → F B) → F A → F B
   bind f = join ∘ fmap f
+  mF : Applicative F
+  mF = mkApplicative pure _<*>_ pure-id pure-∘ pure-hom pure-inter where
+    pure : ∀ {A} → A → F A
+    pure = return
     
+    _<*>_ : ∀ {A B} → F (A → B) → F A → F B
+    _<*>_ = λ f → bind (λ a → return {!!})
+    
+    pure-id : ∀ {X} (x : F X) → (pure id <*> x) ≡ x
+    pure-id = {!!}
+    
+    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
+    pure-∘ = {!!}
+    
+    pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
+    pure-hom = {!!}
+    
+    pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
+    pure-inter = {!!}
 
 record KleisliTriple (F : Set → Set) : Set₁ where
   constructor mkKleisli
@@ -103,6 +121,12 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   mx >> my = mx >>= (const my)
   liftM : ∀ {A B} → (A → B) → F A → F B
   liftM f x = bind (λ x → return (f x)) x
+  
+  naturality-return : ∀ {A B} (f : A → F B)(x : A) → return (f x) ≡ liftM f (return x)
+  naturality-return f x = sym $ begin
+                      (liftM f (return x)) ≡⟨ (unity-left-bind (λ a → return (f a)) x) ⟩
+                      refl
+  
   funF : Functor F
   funF = mkFunctor liftM liftM-id liftM-∘ where
 
@@ -111,6 +135,8 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   
     liftM-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → liftM (g ∘ f) fx ≡ (liftM g ∘ liftM f) fx
     liftM-∘ g f x = {!!}
+
+
   
   appF : Applicative F
   appF = mkApplicative pure _<*>_ pure-id pure-∘ pure-hom pure-inter where
@@ -136,17 +162,11 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                  refl)
                  
     pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
-    pure-inter f s = begin
-               {!!}
-               ≡⟨ {!!} ⟩ {!!}
-
+    pure-inter f s = {!!}
+    
     pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
     pure-∘ f g r = begin
-             ((bind (λ a → bind (λ b → return (a b)) r) (bind (λ c → bind (λ d → return (λ e → c d e)) g) (bind (λ h → bind (λ i → return (λ j → λ k → h i j k)) f)
-             (return (λ l → λ m → λ n → l (m n))))))
-             ≡⟨ assoc-bind (λ j → bind (λ k → return (λ l → j k l)) g) (λ a → bind (λ b → return (a b)) r)
-             (bind (λ h → bind (λ q → return (λ u → λ k → h q u k)) f) (return (λ a b c → (a ∘ b) c))) ⟩
-             bind (λ a → bind (λ b → bind (λ c → return (b c)) r) (bind (λ d → return {!!}) {!!})) {!!} ≡⟨ {!!} ⟩ {!!})
+                   {!!}
                    
   
   

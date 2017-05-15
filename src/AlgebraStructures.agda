@@ -63,14 +63,17 @@ record Group (A : Set) : Set where
                        (a ● ε) ≡⟨ (ε-unit₁ a) ⟩ refl)
 
   invElim₂ : (a b : A) → ((inv b ● b) ● a) ≡ a
-  invElim₂ a b = {!!}
+  invElim₂ a b = begin ((inv b ● b) ● a) ≡⟨ cong {!!} (inv-axiom₁ b) ⟩ (ε ● a) ≡⟨ ε-unit₂ a ⟩ refl
 
   invElim : (a b c : A) → (a ● (inv b ● b) ● c) ≡ (a ● c)
-  invElim a b c = begin {!!}
+  invElim a b c = begin (a ● (inv b ● b) ● c) ≡⟨ (cong (mult a) (invElim₂ c b)) ⟩ refl
  
   
   jacketShirtLemma₁ : (a b : A) → (inv (a ● b) ● (a ● b)) ≡ ε
   jacketShirtLemma₁ a b = inv-axiom₁ (a ● b)
+
+  jS : (a b : A) → ((a ● b) ● inv (a ● b)) ≡ ε
+  jS a b = inv-axiom₂ (a ● b)
   
   jacketShirtLemma₂ : (a b : A) → (((inv b) ● (inv a) ● a) ● b) ≡ ε
   jacketShirtLemma₂ a b = begin (((inv b) ● (inv a) ● a) ● b) ≡⟨ (assoc-Group (inv b) (inv a ● a) b) ⟩
@@ -79,6 +82,7 @@ record Group (A : Set) : Set where
   
   jacketShirt : (a b : A) → (inv (a ● b)) ≡ ((inv b) ● (inv a))
   jacketShirt a b = {!!}
+  
 open Group {{...}} public
   
 record Abelian (A : Set) : Set where
@@ -121,7 +125,10 @@ record LeeRing (A : Set){{R : Ring A}} : Set where
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
     leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (a · c)) + (c · (a · b))) ≡ θ
   anticommute : (a b : A) → (a · b) ≡ ((invPlus b) · a)
-  anticommute a b = begin ((a · b) ≡⟨ {!!} ⟩ {!!})
+  anticommute a b = begin
+               {!!}
+               ≡⟨ {!!} ⟩
+               {!!}
 
 record BoolRing (A : Set){{R : Ring A}} : Set where
   constructor mkBoolRing

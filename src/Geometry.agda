@@ -9,6 +9,12 @@ Point = Set
 data PDP (A B : Point) : Set where
   _,_ : A → B → PDP A B
 
+fst : {A B : Point} → PDP A B → A
+fst (x , x₁) = x
+
+snd : {A B : Point} → PDP A B → B
+snd (x , x₁) = x₁
+
 data Line (A B : Point) : Set where
   line : PDP A B → Line A B
 
