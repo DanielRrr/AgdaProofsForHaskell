@@ -83,25 +83,6 @@ record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
     naturality-join : ∀ {A B}{f : A → F B}(mmx : F ( F A ))→ join (fmap (fmap f) mmx) ≡ fmap f (join mmx)
   bind : ∀ {A B} → (A → F B) → F A → F B
   bind f = join ∘ fmap f
-  mF : Applicative F
-  mF = mkApplicative pure _<*>_ pure-id pure-∘ pure-hom pure-inter where
-    pure : ∀ {A} → A → F A
-    pure = return
-    
-    _<*>_ : ∀ {A B} → F (A → B) → F A → F B
-    _<*>_ = λ f → bind (λ a → return {!!})
-    
-    pure-id : ∀ {X} (x : F X) → (pure id <*> x) ≡ x
-    pure-id = {!!}
-    
-    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ = {!!}
-    
-    pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
-    pure-hom = {!!}
-    
-    pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
-    pure-inter = {!!}
 
 record KleisliTriple (F : Set → Set) : Set₁ where
   constructor mkKleisli

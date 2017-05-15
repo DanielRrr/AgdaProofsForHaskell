@@ -1,8 +1,8 @@
+module Geometry where
+
 open import Function
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans; subst)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-
-module Geometry where
 
 Point = Set
 
@@ -56,7 +56,16 @@ lineFmap = mkFunctor map map-id map-∘ where
   map-id (line (x , x₁)) = refl
 
   map-∘ : {A B C D : Point} (g : C → D) (f : B → C) (fx : Line A B) → map (g ∘ f) fx ≡ (map g ∘ map f) fx
-  map-∘ g f (line (x , y)) = begin
-        (map (g ∘ f) (line (x , y))
-        ≡⟨ cong (map (g ∘ f)) refl ⟩
-        refl)
+  map-∘ g f (line (x , y)) = refl
+
+
+planeFunctor : ∀ {A B} → Functor (Plane A B)
+planeFunctor = mkFunctor pmap pmap-id pmap-∘ where
+  pmap : ∀ {A B C D : Point} → (C → D) → Plane A B C → Plane A B D
+  pmap f (plane (x , (y , z))) = plane (x , (y , f z))
+
+  pmap-id : {A B C : Point} (fx : Plane A B C) → pmap id fx ≡ id fx
+  pmap-id (plane (x , (x₁ , x₂))) = refl
+
+  pmap-∘ : {A B C D E : Point} (g : D → E) (f : C → D) (fx : Plane A B C) → pmap (g ∘ f) fx ≡ (pmap g ∘ pmap f) fx
+  pmap-∘ g f (plane (x , (x₁ , x₂))) = refl
