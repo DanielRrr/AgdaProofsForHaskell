@@ -1,6 +1,6 @@
 module AlgebraStructures where
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans; subst)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function
 
@@ -51,6 +51,12 @@ record Group (A : Set) : Set where
   monA : Monoid A
   monA = mkMonoid ε _●_ ε-unit₁ ε-unit₂ assoc-Group
 
+  mon-● : (a b c : A) → a ≡ b → (a ● c) ≡ (b ● c)
+  mon-● a b c refl = refl
+
+  mon-●₁ : (a b c : A) → a ≡ b → (c ● a) ≡ (c ● b)
+  mon-●₁ a b c refl = refl
+
   neut-Prop : (a : A) → (a ● ε) ≡ (ε ● a)
   neut-Prop a = trans (ε-unit₁ a) (sym (ε-unit₂ a))
   
@@ -63,7 +69,10 @@ record Group (A : Set) : Set where
                        (a ● ε) ≡⟨ (ε-unit₁ a) ⟩ refl)
 
   invElim₂ : (a b : A) → ((inv b ● b) ● a) ≡ a
-  invElim₂ a b = begin ((inv b ● b) ● a) ≡⟨ cong {!!} (inv-axiom₁ b) ⟩ (ε ● a) ≡⟨ ε-unit₂ a ⟩ refl
+  invElim₂ a b = begin
+                 ((inv b ● b) ● a)
+                 ≡⟨ mon-● (_●_ (inv b) b) ε a (inv-axiom₁ b) ⟩
+                 ε-unit₂ a
 
   invElim : (a b c : A) → (a ● (inv b ● b) ● c) ≡ (a ● c)
   invElim a b c = begin (a ● (inv b ● b) ● c) ≡⟨ (cong (mult a) (invElim₂ c b)) ⟩ refl
@@ -79,10 +88,20 @@ record Group (A : Set) : Set where
   jacketShirtLemma₂ a b = begin (((inv b) ● (inv a) ● a) ● b) ≡⟨ (assoc-Group (inv b) (inv a ● a) b) ⟩
                           ((inv b) ● ((inv a ● a) ● b) ≡⟨ invElim (inv b) a b ⟩
                           inv-axiom₁ b)
-  
+
+  invLemmaforJS : (a : A) → inv a ≡ (inv a ● inv a ● a)
+  invLemmaforJS a = sym $ (inv a ● inv a ● a) ≡⟨ invElim₁ (inv a) a ⟩ refl
+
   jacketShirt : (a b : A) → (inv (a ● b)) ≡ ((inv b) ● (inv a))
   jacketShirt a b = {!!}
-  
+
+  invLemma : (a : A) → (inv (inv a) ● (inv a)) ≡ ε
+  invLemma a = inv-axiom₁ (inv a)
+
+  invTheorem : (a : A) → inv (inv a) ≡ a
+  invTheorem a = sym $ begin
+                 a ≡⟨ {!!} ⟩ {!!}
+
 open Group {{...}} public
   
 record Abelian (A : Set) : Set where
@@ -115,38 +134,37 @@ record Ring (A : Set) : Set where
       ·-assoc : (a b c : A) → ((a · b) · c) ≡ (a · (b · c))
   abA : Abelian A
   abA = mkAbelian θ _+_ +-θ +-assoc invPlus +-inv +-commute
+open Ring {{...}} public
   
 
 
 record LeeRing (A : Set){{R : Ring A}} : Set where
   constructor mkLeeRing
-  open Ring {{...}}
   field
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
     leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (a · c)) + (c · (a · b))) ≡ θ
   anticommute : (a b : A) → (a · b) ≡ ((invPlus b) · a)
   anticommute a b = begin
-               {!!}
-               ≡⟨ {!!} ⟩
+               a · b
+               ≡⟨ cong (_·_ a) {!!} ⟩
                {!!}
 
 record BoolRing (A : Set){{R : Ring A}} : Set where
   constructor mkBoolRing
-  open Ring {{...}}
   field
     imdepotency : (a : A) → (a · a) ≡ a
+  
 
 record RingWithOne (A : Set){{R : Ring A}} : Set where
   constructor mkAssocRingWithOne
-  open Ring {{...}}
   field
     ε : A
     ·-unit₁ : (a : A) → (a · ε) ≡ a
     ·-unit₂ : (a : A) → (ε · a) ≡ a
+  
 
 record CommutativeRing (A : Set){{R : Ring A}} : Set where
   constructor mkCommutativeRing
-  open Ring {{...}}
   field
     com-· : (a b : A) → (a · b) ≡ (b · a)
 

@@ -5,6 +5,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; seto
 open import Identity
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
+morAssoc : {A B C D : Set} → (f : A → B)(g : B → C)(h : C → D)(x : A) → (h ∘ (g ∘ f)) x ≡ ((h ∘ g) ∘ f) x
+morAssoc f g h x = refl
+
+idMor : {A B : Set} → (f : A → B)(x : A) → (id ∘ f) x ≡ (f ∘ id) x
+idMor f x = refl
 
 record Functor (F : Set → Set) : Set₁ where
   constructor mkFunctor
@@ -102,20 +107,34 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   mx >> my = mx >>= (const my)
   liftM : ∀ {A B} → (A → B) → F A → F B
   liftM f x = bind (λ x → return (f x)) x
+  join : ∀ {A} → F (F A) → F A
+  join f = f >>= id
+
+  liftM-id : {A : Set}(fx : F A) → liftM id fx ≡ id fx
+  liftM-id x = begin ((liftM id x) ≡⟨ unity-right-bind x ⟩ refl)
+
+  unity-left : ∀ {A}(mx : F A) → join (return mx) ≡ mx
+  unity-left mx =
+                (join (return mx)) ≡⟨ refl ⟩
+                ((bind id (return mx)) ≡⟨ (unity-left-bind id mx) ⟩ refl)
+  
+  unity-right : ∀ {A}(mx : F A) → join (liftM return mx) ≡ mx
+  unity-right mx = (join (liftM return mx)) ≡⟨ refl ⟩ (bind id (liftM return mx))
+                   ≡⟨ assoc-bind (λ a → return (return a)) id mx ⟩
+                   (bind (λ a → bind id (return (return a))) mx)
+                   ≡⟨ {!!} ⟩
+                   {!!}
   
   naturality-return : ∀ {A B} (f : A → F B)(x : A) → return (f x) ≡ liftM f (return x)
   naturality-return f x = sym $ begin
                       (liftM f (return x)) ≡⟨ (unity-left-bind (λ a → return (f a)) x) ⟩
                       refl
-  
-  funF : Functor F
-  funF = mkFunctor liftM liftM-id liftM-∘ where
 
-    liftM-id : {A : Set}(fx : F A) → liftM id fx ≡ id fx
-    liftM-id x = begin ((liftM id x) ≡⟨ unity-right-bind x ⟩ refl)
-  
-    liftM-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → liftM (g ∘ f) fx ≡ (liftM g ∘ liftM f) fx
-    liftM-∘ g f x = {!!}
+  naturality-join : ∀ {A B}(f : A → F B)(mmx : F ( F A )) → join (liftM (liftM f) mmx) ≡ liftM f (join mmx)
+  naturality-join f mx =
+                    (join (liftM (liftM f) mx))
+                    ≡⟨ {!unity-right-bind!} ⟩
+                    {!!}
 
 
   
@@ -143,10 +162,21 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                  refl)
                  
     pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
-    pure-inter f s = {!!}
+    pure-inter f s = sym $ begin
+                     ((pure (λ f → f s) <*> f)
+                     ≡⟨ refl ⟩
+                     bind (λ a → bind (λ b → return (a b)) f) (return (λ f → f s))
+                     ≡⟨ unity-left-bind (λ a → bind (λ b → return (a b)) f) (λ f → f s) ⟩
+                     bind (λ b → return (b s)) f
+                     ≡⟨ refl ⟩
+                     liftM (λ f → f s) f ≡⟨ refl ⟩
+                     (sym $ begin
+                     (f <*> (return s))
+                     ≡⟨ {!!} ⟩ {!!}))
     
     pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
     pure-∘ f g r = begin
+
                    {!!}
                    
   

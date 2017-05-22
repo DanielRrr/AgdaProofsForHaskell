@@ -24,6 +24,9 @@ data Plane (A B C : Point) : Set where
 lineToPlane : {A B C : Point} → Line A B → Line B C → Plane A B C
 lineToPlane (line (x , x₁)) (line x₂) = plane (x , x₂)
 
+linePointPlane : {A B C : Point} → Line A B → C → Plane A B C
+linePointPlane (line (x , x₁)) x₂ = plane (x , (x₁ , x₂))
+
 lineElim : {A B : Point} → Line A B → PDP A B
 lineElim (line (x , x₁)) = x , x₁
 
