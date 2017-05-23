@@ -41,10 +41,19 @@ record Group (A : Set) : Set where
     inv : A → A
     inv-axiom₁ : (a : A) → (inv a ● a) ≡ ε
     inv-axiom₂ : (a : A) → (a ● (inv a)) ≡ ε
+    
   commutator : (a b : A) → A
   commutator a b = (inv a) ● (inv b) ● a ● b
+  
+  _∶_ : (a b : A) → A
+  a ∶ b = a ● inv b
+
+  div : (a b : A) → A
+  div a b = a ∶ b
+  
   mult : A → A → A
   mult x y = x ● y
+
   semiA : Semigroup A
   semiA = mkSemigroup _●_ assoc-Group
   
@@ -92,15 +101,94 @@ record Group (A : Set) : Set where
   invLemmaforJS : (a : A) → inv a ≡ (inv a ● inv a ● a)
   invLemmaforJS a = sym $ (inv a ● inv a ● a) ≡⟨ invElim₁ (inv a) a ⟩ refl
 
-  jacketShirt : (a b : A) → (inv (a ● b)) ≡ ((inv b) ● (inv a))
-  jacketShirt a b = {!!}
+  invP : (a : A) → ((a ● inv a) ● inv a) ≡ inv a
+  invP a = begin
+           ((a ● inv a) ● inv a
+           ≡⟨ mon-● (a ● inv a) ε (inv a) (inv-axiom₂ a) ⟩
+           ε ● inv a ≡⟨ ε-unit₂ (inv a) ⟩ refl)
+
+  divInv : (a : A) → inv a ≡ ((a ∶ a) ∶ a)
+  divInv a = sym $ begin
+             (((a ∶ a) ∶ a) ≡⟨ refl ⟩
+             _●_ (_●_ a (inv a)) (inv a)
+             ≡⟨ refl ⟩
+             ((a ● inv a) ● inv a)
+             ≡⟨ invP a ⟩
+             refl)
+
+  unit-prop : inv ε ≡ ε
+  unit-prop = sym $ begin
+              ε ≡⟨ sym (inv-axiom₁ ε) ⟩
+              sym (begin
+              (inv ε) ≡⟨ sym (ε-unit₁ (inv ε)) ⟩ refl)
+
+  divE : (a : A) → (a ∶ a) ≡ ε
+  divE a = begin
+           ((a ● inv a) ≡⟨ inv-axiom₂ a ⟩ refl)
+
+  divE₁ : (a : A) → a ∶ (a ∶ a) ≡ a
+  divE₁ a = begin
+            (_●_ a (inv (a ∶ a))
+            ≡⟨ cong (mult a) (cong inv (divE a)) ⟩
+            (a ● (inv ε)) ≡⟨ cong (_●_ a) unit-prop ⟩
+            (_●_ a ε) ≡⟨ (ε-unit₁ a) ⟩ refl)
 
   invLemma : (a : A) → (inv (inv a) ● (inv a)) ≡ ε
   invLemma a = inv-axiom₁ (inv a)
 
+  invLemma100500 : (a b : A) → (a ● b ● inv b) ≡ a
+  invLemma100500 a b = begin
+                     ((a ● b ● inv b) ≡⟨ cong (_●_ a) (inv-axiom₂ b) ⟩
+                     ε-unit₁ a)
+
+  invLemma100501 : (a b : A) → (a ● inv a ● b) ≡ b
+  invLemma100501 a b =
+                     (a ● inv a ● b)
+                     ≡⟨ sym (assoc-Group a (inv a) b) ⟩
+                     ((a ● inv a) ● b) ≡⟨ (mon-● (a ● inv a) ε b (inv-axiom₂ a)) ⟩ (ε-unit₂ b)
+
+  invLemma100502 : (a b : A) → (inv a ● (a ● b) ● inv (a ● b)) ≡ inv a
+  invLemma100502 a b = begin
+                       (inv a ● (a ● b) ● inv (a ● b))
+                       ≡⟨ (cong (_●_ (inv a)) (inv-axiom₂ (a ● b))) ⟩ ε-unit₁ (inv a)
+
+
+  bracketLemma : (a b c d e : A) → (a ● b ● (c ● d) ● e) ≡ (((a ● b ● c) ● d) ● e)
+  bracketLemma a b c d e = {!!}
+
+
+  jacketShirt : (a b : A) → (inv (a ● b)) ≡ ((inv b) ● (inv a))
+  jacketShirt a b = sym $ begin
+                          ((inv b) ● (inv a))
+                          ≡⟨ (mon-●₁ (inv a) (inv a ● (a ● b) ● inv (a ● b)) (inv b) (sym (invLemma100502 a b))) ⟩
+                          inv b ● inv a ● (a ● b) ● inv (a ● b) ≡⟨ {!!} ⟩
+                          (((inv b) ● (inv a) ● a) ● b) ● inv (a ● b)
+                          ≡⟨ mon-● ((((inv b) ● (inv a) ● a) ● b)) ε (inv (a ● b)) (jacketShirtLemma₂ a b) ⟩
+                          ε-unit₂ (inv (a ● b))
+
+
   invTheorem : (a : A) → inv (inv a) ≡ a
-  invTheorem a = sym $ begin
-                 a ≡⟨ {!!} ⟩ {!!}
+  invTheorem a = sym $
+               begin a ≡⟨ sym (divE₁ a) ⟩
+               (a ∶ (a ∶ a)
+               ≡⟨ refl ⟩
+               (_●_ a (inv (a ∶ a)))
+               ≡⟨ cong (_●_ a) (divInv (a ∶ a)) ⟩
+               _●_ a (_●_ (_●_ (_●_ a (inv a)) (inv (_●_ a (inv a)))) (inv (_●_ a (inv a))))
+               ≡⟨ sym (assoc-Group a (_●_ (_●_ a (inv a)) (inv (a ● inv a))) (inv (a ● inv a))) ⟩
+               ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv (a ● inv a))
+               ≡⟨ cong (_●_ (_●_ a (_●_ (_●_ a (inv a)) (inv (a ● inv a))))) (jacketShirt a (inv a)) ⟩
+               ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv (inv a) ● inv a)
+               ≡⟨ assoc-Group a (_●_ (_●_ a (inv a)) (inv (a ● inv a))) (_●_ (inv (inv a)) (inv a)) ⟩
+               (a ● ((a ● inv a) ● inv (a ● inv a)) ● inv (inv a) ● inv a) ≡⟨ refl ⟩
+               (a ● ((a ● inv a) ● inv (a ● inv a)) ● (inv (inv a) ● inv a))
+               ≡⟨ sym (assoc-Group a ((a ● inv a) ● inv (a ● inv a)) ((inv (inv a) ● inv a))) ⟩
+               ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv (inv a) ● inv a)
+               ≡⟨ (cong (_●_ (_●_ a (_●_ (_●_ a (inv a)) (inv (a ● inv a))))) (sym (inv-Prop (inv a)))) ⟩
+               ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv a ● inv (inv a))
+               ≡⟨ mon-● (a ● (a ● inv a) ● inv (a ● inv a)) a (inv a ● inv (inv a)) (invLemma100500 a (a ● inv a)) ⟩
+               (a ● inv a ● inv (inv a)) ≡⟨ invLemma100501 a (inv (inv a)) ⟩ refl)
+                 
 
 open Group {{...}} public
   
