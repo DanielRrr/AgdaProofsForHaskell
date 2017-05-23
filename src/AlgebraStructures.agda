@@ -153,15 +153,14 @@ record Group (A : Set) : Set where
                        ≡⟨ (cong (_●_ (inv a)) (inv-axiom₂ (a ● b))) ⟩ ε-unit₁ (inv a)
 
 
-  bracketLemma : (a b c d e : A) → (a ● b ● (c ● d) ● e) ≡ (((a ● b ● c) ● d) ● e)
-  bracketLemma a b c d e = {!!}
-
+  postulate
+    bracketLemma : (a b c d e : A) → (a ● b ● (c ● d) ● e) ≡ (((a ● b ● c) ● d) ● e)
 
   jacketShirt : (a b : A) → (inv (a ● b)) ≡ ((inv b) ● (inv a))
   jacketShirt a b = sym $ begin
                           ((inv b) ● (inv a))
                           ≡⟨ (mon-●₁ (inv a) (inv a ● (a ● b) ● inv (a ● b)) (inv b) (sym (invLemma100502 a b))) ⟩
-                          inv b ● inv a ● (a ● b) ● inv (a ● b) ≡⟨ {!!} ⟩
+                          inv b ● inv a ● (a ● b) ● inv (a ● b) ≡⟨ bracketLemma (inv b) (inv a) a b (inv (a ● b)) ⟩
                           (((inv b) ● (inv a) ● a) ● b) ● inv (a ● b)
                           ≡⟨ mon-● ((((inv b) ● (inv a) ● a) ● b)) ε (inv (a ● b)) (jacketShirtLemma₂ a b) ⟩
                           ε-unit₂ (inv (a ● b))
@@ -189,19 +188,42 @@ record Group (A : Set) : Set where
                ≡⟨ mon-● (a ● (a ● inv a) ● inv (a ● inv a)) a (inv a ● inv (inv a)) (invLemma100500 a (a ● inv a)) ⟩
                (a ● inv a ● inv (inv a)) ≡⟨ invLemma100501 a (inv (inv a)) ⟩ refl)
                  
+  injective : (a b c : A) → ((a ● b) ≡ (a ● c)) → b ≡ c
+  injective a b c f = begin
+                b ≡⟨ (sym (ε-unit₂ b)) ⟩
+                (ε ● b) ≡⟨ mon-● ε (inv a ● a) b (sym (inv-axiom₁ a)) ⟩
+                ((inv a ● a) ● b) ≡⟨ (assoc-Group (inv a) a b) ⟩
+                (inv a ● a ● b) ≡⟨ (cong (_●_ (inv a)) f) ⟩
+                (inv a ● a ● c) ≡⟨ (sym (assoc-Group (inv a) a c)) ⟩
+                (((inv a ● a) ● c) ≡⟨ (mon-● (inv a ● a) ε c (inv-axiom₁ a)) ⟩
+                ε-unit₂ c)
 
+  commutatorLemma : (a b : A) → inv (commutator a b) ≡ (commutator b a)
+  commutatorLemma a b = begin
+                      ((inv (inv a ● inv b ● a ● b))
+                      ≡⟨ jacketShirt (inv a) (inv b ● a ● b) ⟩
+                      (inv (inv b ● a ● b) ● inv (inv a))
+                      ≡⟨ (cong (_●_ (inv (inv b ● a ● b))) (invTheorem a)) ⟩
+                      ((inv (inv b ● a ● b) ● a) ≡⟨ (mon-● (inv (inv b ● a ● b)) (inv b ● inv a ● b) a
+                      (begin
+                      ((inv (inv b ● a ● b)) ≡⟨ (jacketShirt (inv b) (a ● b)) ⟩
+                      (inv (a ● b) ● inv (inv b)) ≡⟨ (cong (_●_ (inv (a ● b))) (invTheorem b)) ⟩
+                      (inv (a ● b) ● b ≡⟨ mon-● (inv (a ● b)) (inv b ● inv a) b (jacketShirt a b) ⟩ assoc-Group (inv b) (inv a) b)))) ⟩
+                      ((inv b ● inv a ● b) ● a) ≡⟨ (assoc-Group (inv b) (inv a ● b) a) ⟩
+                      inv b ● (inv a ● b) ● a
+                      ≡⟨ mon-●₁ ((inv a ● b) ● a) (inv a ● b ● a) (inv b) (assoc-Group (inv a) b a) ⟩
+                      refl))
+
+  commmutatorTheorem : (a b : A) → ((commutator a b) ≡ ε) → (a ● b) ≡ (b ● a)
+  commmutatorTheorem a b f = {!!}
+                     
 open Group {{...}} public
   
-record Abelian (A : Set) : Set where
+record Abelian (A : Set){{GR : Group A}} : Set where
   constructor mkAbelian
   field
-    ε : A
-    _●_ : A → A → A
-    ε-unit : (x : A) → (x ● ε) ≡ x
-    assoc-Monoid : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
-    inv : A → A
-    inv-axiom : (a : A) → ((inv a) ● a) ≡ ε
     commute : (a b : A) → (a ● b) ≡ (b ● a)
+open Abelian {{...}} public
 
 record Ring (A : Set) : Set where
   constructor mkRing
@@ -214,15 +236,34 @@ record Ring (A : Set) : Set where
       _·_ : A → A → A
       +-assoc : (a b c : A) → ((a + b) + c) ≡ (a + (b + c))
       +-commute : (a b : A) → (a + b) ≡ (b + a)
-      +-inv : (a : A) → ((invPlus a) + a) ≡ θ
+      +-inv₁ : (a : A) → ((invPlus a) + a) ≡ θ
+      +-inv₂ : (a : A) → (a + invPlus a) ≡ θ
       +-θ : (a : A) → (a + θ) ≡ a
       θ-unit : (x : A) → (θ + x) ≡ x
       ·-distr-left : (a b c : A) → ((a + b) · c) ≡ ((a · c) + (b · c))
       ·-distr-right : (a b c : A) → (a · (b + c)) ≡ ((a · b) + (a · c))
-      ·-assoc : (a b c : A) → ((a · b) · c) ≡ (a · (b · c))
-  abA : Abelian A
-  abA = mkAbelian θ _+_ +-θ +-assoc invPlus +-inv +-commute
+
+  cong-+ : (a b c : A) → a ≡ b → (a + c) ≡ (b + c)
+  cong-+ a b c refl = refl
+
+  cong-· : (a b c : A) → a ≡ b → (a · c) ≡ (b · c)
+  cong-· a b c refl = refl
+
+  id₁ : (a b : A) → ((invPlus a) + (a + b)) ≡ b
+  id₁ a b = begin
+            (invPlus a + a + b)
+            ≡⟨ sym (+-assoc (invPlus a) a b) ⟩
+            ((invPlus a + a) + b) ≡⟨ cong-+ (invPlus a + a) θ b (+-inv₁ a) ⟩ θ-unit b
+
+  id₂ : (a : A) → ((invPlus a) + a) ≡ (a + invPlus a)
+  id₂ a = trans (+-inv₁ a) (sym (+-inv₂ a))
+
+  [_,_,_] : (a b c : A) → A
+  [_,_,_] a b c = (a · b · c) + invPlus (a · (b · c))
+  
 open Ring {{...}} public
+
+
   
 
 
@@ -232,11 +273,8 @@ record LeeRing (A : Set){{R : Ring A}} : Set where
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
     leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (a · c)) + (c · (a · b))) ≡ θ
   anticommute : (a b : A) → (a · b) ≡ ((invPlus b) · a)
-  anticommute a b = begin
-               a · b
-               ≡⟨ cong (_·_ a) {!!} ⟩
-               {!!}
-
+  anticommute a b = {!!}
+  
 record BoolRing (A : Set){{R : Ring A}} : Set where
   constructor mkBoolRing
   field
