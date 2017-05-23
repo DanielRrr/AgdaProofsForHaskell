@@ -215,7 +215,17 @@ record Group (A : Set) : Set where
                       refl))
 
   commmutatorTheorem : (a b : A) → ((commutator a b) ≡ ε) → (a ● b) ≡ (b ● a)
-  commmutatorTheorem a b f = {!!}
+  commmutatorTheorem a b f = sym
+                             (begin
+                             (b ● a) ≡⟨ (mon-●₁ a (a ● commutator a b) b (sym ((a ● commutator a b) ≡⟨ (mon-●₁ (commutator a b) ε a f) ⟩ ε-unit₁ a))) ⟩
+                             (b ● a ● commutator a b) ≡⟨ refl ⟩
+                             (b ● a ● (inv a ● inv b ● a ● b))
+                             ≡⟨ mon-●₁ (a ● (inv a ● inv b ● a ● b)) (inv b ● a ● b) b ((a ● inv a ● inv b ● a ● b) ≡⟨ sym (assoc-Group a (inv a) (inv b ● a ● b)) ⟩
+                             ((a ● inv a) ● inv b ● a ● b) ≡⟨ (mon-● (a ● inv a) ε (inv b ● a ● b) (inv-axiom₂ a)) ⟩ ε-unit₂ (inv b ● a ● b)) ⟩
+                             (b ● inv b ● a ● b) ≡⟨ (sym (assoc-Group b (inv b) (a ● b))) ⟩
+                             ((b ● inv b) ● a ● b) ≡⟨ (mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b)) ⟩ ε-unit₂ (a ● b))
+                       
+                         
                      
 open Group {{...}} public
   
