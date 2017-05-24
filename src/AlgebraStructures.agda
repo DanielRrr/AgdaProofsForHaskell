@@ -188,8 +188,8 @@ record Group (A : Set) : Set where
                ≡⟨ mon-● (a ● (a ● inv a) ● inv (a ● inv a)) a (inv a ● inv (inv a)) (invLemma100500 a (a ● inv a)) ⟩
                (a ● inv a ● inv (inv a)) ≡⟨ invLemma100501 a (inv (inv a)) ⟩ refl)
                  
-  injective : (a b c : A) → ((a ● b) ≡ (a ● c)) → b ≡ c
-  injective a b c f = begin
+  cancel₁ : (a b c : A) → ((a ● b) ≡ (a ● c)) → b ≡ c
+  cancel₁ a b c f = begin
                 b ≡⟨ (sym (ε-unit₂ b)) ⟩
                 (ε ● b) ≡⟨ mon-● ε (inv a ● a) b (sym (inv-axiom₁ a)) ⟩
                 ((inv a ● a) ● b) ≡⟨ (assoc-Group (inv a) a b) ⟩
@@ -198,6 +198,22 @@ record Group (A : Set) : Set where
                 (((inv a ● a) ● c) ≡⟨ (mon-● (inv a ● a) ε c (inv-axiom₁ a)) ⟩
                 ε-unit₂ c)
 
+  cancel₂ : (a b c : A) → ((a ● c) ≡ (b ● c)) → a ≡ b
+  cancel₂ a b c f = begin
+                    a
+                    ≡⟨ sym (ε-unit₁ a) ⟩
+                    a ● ε
+                    ≡⟨ mon-●₁ ε (c ● inv c) a (sym (inv-axiom₂ c)) ⟩
+                    a ● c ● inv c
+                    ≡⟨ sym (assoc-Group a c (inv c)) ⟩
+                    (a ● c) ● inv c
+                    ≡⟨ mon-● (a ● c) (b ● c) (inv c) f ⟩
+                    (b ● c) ● inv c
+                    ≡⟨ assoc-Group b c (inv c) ⟩
+                    b ● c ● inv c
+                    ≡⟨ mon-●₁ (c ● inv c) ε b (inv-axiom₂ c) ⟩
+                    ε-unit₁ b
+  
   commutatorLemma : (a b : A) → inv (commutator a b) ≡ (commutator b a)
   commutatorLemma a b = begin
                       ((inv (inv a ● inv b ● a ● b))
