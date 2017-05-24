@@ -272,8 +272,11 @@ record Ring (A : Set) : Set where
   cong-+ : (a b c : A) → a ≡ b → (a + c) ≡ (b + c)
   cong-+ a b c refl = refl
 
-  cong-· : (a b c : A) → a ≡ b → (a · c) ≡ (b · c)
-  cong-· a b c refl = refl
+  cong-·₁ : (a b c : A) → a ≡ b → (a · c) ≡ (b · c)
+  cong-·₁ a b c refl = refl
+
+  cong-·₂ : (a b c : A) → a ≡ b → (c · a) ≡ (c · b)
+  cong-·₂ a b c refl = refl
 
   id₁ : (a b : A) → ((invPlus a) + (a + b)) ≡ b
   id₁ a b = begin
@@ -284,12 +287,120 @@ record Ring (A : Set) : Set where
   id₂ : (a : A) → ((invPlus a) + a) ≡ (a + invPlus a)
   id₂ a = trans (+-inv₁ a) (sym (+-inv₂ a))
 
-  [_,_,_] : (a b c : A) → A
-  [_,_,_] a b c = (a · b · c) + invPlus (a · (b · c))
+  zeroLemma₁ : (a b : A) → (a · b) ≡ ((a · b) + (a · θ))
+  zeroLemma₁ a b = begin
+                   (a · b) ≡⟨ (cong-·₂ b (b + θ) a (sym (+-θ b))) ⟩
+                   a · (b + θ) ≡⟨ ·-distr-right a b θ ⟩ refl
+
+  zeroLemma₂ : (a b : A) → (b · a) ≡ ((b · a) + (θ · a))
+  zeroLemma₂ a b = begin
+                   ((b · a) ≡⟨ (cong-·₁ b (b + θ) a (sym (+-θ b))) ⟩
+                   ((b + θ) · a) ≡⟨ (·-distr-left b θ a) ⟩ refl)
+
+  distrLaw₁ : (a b c d : A) → ((a + b) · (c + d)) ≡ ((a · c) + (a · d) + (b · c) + (b · d))
+  distrLaw₁ a b c d =
+                ((a + b) · (c + d))
+                ≡⟨ ·-distr-right (a + b) c d ⟩
+                (a + b) · c + (a + b) · d
+                ≡⟨ cong-+ ((a + b) · c) (a · c + b · c) ((a + b) · d) (·-distr-left a b c) ⟩
+                (a · c + b · c) + (a + b) · d
+                ≡⟨ +-commute (a · c + b · c) ((a + b) · d) ⟩
+                (a + b) · d + a · c + b · c
+                ≡⟨ cong-+ ((a + b) · d) (a · d + b · d) (a · c + b · c) (·-distr-left a b d) ⟩
+                (a · d + b · d) + a · c + b · c
+                ≡⟨ +-commute (a · d + b · d) (a · c + b · c) ⟩
+                (a · c + b · c) + a · d + b · d
+                ≡⟨ +-assoc (a · c) (b · c) (a · d + b · d) ⟩
+                a · c + b · c + a · d + b · d
+                ≡⟨ +-commute (a · c) (b · c + a · d + b · d) ⟩
+                (b · c + a · d + b · d) + a · c
+                ≡⟨ cong-+ (b · c + a · d + b · d) (a · d + b · c + b · d) (a · c) (b · c + a · d + b · d
+                ≡⟨ sym (+-assoc (b · c) (a · d) ( b · d)) ⟩ ((b · c + a · d) + b · d)
+                ≡⟨ cong-+ (b · c + a · d) (a · d + b · c) (b · d) (+-commute (b · c) (a · d)) ⟩
+                +-assoc (a · d) (b · c) (b · d)) ⟩
+                (a · d + b · c + b · d) + a · c
+                ≡⟨ +-commute ( (a · d + b · c + b · d)) (a · c) ⟩
+                refl
+
+  θProp : invPlus θ ≡ θ
+  θProp = sym
+          (begin
+          θ ≡⟨ sym (+-inv₂ θ) ⟩ (θ + invPlus θ) ≡⟨ (θ-unit (invPlus θ)) ⟩ refl)
+
+
+  assM : (a b c : A) → A
+  assM a b c = ((a · b) · c) + invPlus (a · (b · c))
+
+  associatorTheorem : (a b c : A) → (assM a b c ≡ θ) → ((a · b) · c) ≡ (a · (b · c))
+  associatorTheorem a b c f = sym $
+                      begin
+                      (a · (b · c) ≡⟨ sym (θ-unit (a · b · c)) ⟩
+                      (θ + a · b · c) ≡⟨ (cong-+ θ (assM a b c) (a · b · c) (sym f)) ⟩
+                      assM a b c + a · b · c
+                      ≡⟨ cong-+ (assM a b c) (((a · b) · c) + invPlus (a · (b · c))) (a · b · c) refl ⟩
+                      (((a · b) · c + invPlus (a · b · c)) + a · b · c) ≡⟨ +-assoc ((a · b) · c) (invPlus (a · b · c)) (a · b · c) ⟩
+                      ((a · b) · c + invPlus (a · b · c) + a · b · c) ≡⟨ (+-commute ((a · b) · c) (invPlus (a · b · c) + a · b · c)) ⟩
+                      (((invPlus (a · b · c) + a · b · c) + (a · b) · c) ≡⟨ (cong-+ (invPlus (a · b · c) + a · b · c) θ ((a · b) · c) (+-inv₁ (a · b · c))) ⟩
+                      θ-unit ((a · b) · c)))
+
+
+  eq₁ : (a b c : A) → ((a + b) ≡ c) → (a ≡ (c + invPlus b))
+  eq₁ a b c f = sym $
+              begin
+              (c + invPlus b)
+              ≡⟨ (cong-+ c (a + b) (invPlus b) (sym f)) ⟩
+              ((a + b) + invPlus b)
+              ≡⟨ (+-assoc a b (invPlus b)) ⟩
+              (a + b + invPlus b
+              ≡⟨ +-commute a (b + invPlus b) ⟩
+              (b + invPlus b) + a
+              ≡⟨ cong-+ (b + invPlus b) θ a (+-inv₂ b) ⟩
+              θ-unit a)
+
+  eq₂ : (a b c : A) → ((a + b) ≡ c) → (b ≡ (c + invPlus a))
+  eq₂ a b c f = sym $ begin
+              ((c + invPlus a)
+              ≡⟨ (cong-+ c (a + b) (invPlus a) (sym f)) ⟩
+              ((a + b) + invPlus a
+              ≡⟨ +-assoc a b (invPlus a) ⟩
+              a + b + invPlus a
+              ≡⟨ +-commute a (b + invPlus a) ⟩
+              ((b + invPlus a) + a)
+              ≡⟨ (+-assoc b (invPlus a) a) ⟩
+              (b + invPlus a + a
+              ≡⟨ +-commute b (invPlus a + a) ⟩
+              (invPlus a + a) + b
+              ≡⟨ cong-+ (invPlus a + a) θ b (+-inv₁ a) ⟩
+              θ-unit b)))
+
+  zeroProp : (a : A) → ((θ + a) ≡ θ) → a ≡ θ
+  zeroProp a f = sym $
+               begin
+               (θ
+               ≡⟨ sym f ⟩
+               θ-unit a)
+
+
+  zeroProp₁ : (a b : A) → ((a + b) ≡ a) → (b ≡ θ)
+  zeroProp₁ a b f =
+              b
+              ≡⟨ eq₂ a b a f ⟩
+              +-inv₂ a
+               
+  θProp₁ : (a : A) → a · θ ≡ θ
+  θProp₁ a = {!!}
+
+  θProp₂ : (a : A) → θ · a ≡ θ
+  θProp₂ = {!!}
+  
   
 open Ring {{...}} public
 
-
+record AssociativeRing (A : Set){{R : Ring A}} : Set where
+  constructor mkAssocRing
+  field
+    ·-assoc : (a b c : A) → (a · b · c) ≡ ((a · b) · c)
+open AssociativeRing {{...}} public
   
 
 
@@ -297,14 +408,21 @@ record LeeRing (A : Set){{R : Ring A}} : Set where
   constructor mkLeeRing
   field
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
-    leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (a · c)) + (c · (a · b))) ≡ θ
-  anticommute : (a b : A) → (a · b) ≡ ((invPlus b) · a)
+    leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (c · a)) + (c · (a · b))) ≡ θ
+  anticommute : (a b : A) → (a · b) ≡ (invPlus (b · a))
   anticommute a b = {!!}
   
-record BoolRing (A : Set){{R : Ring A}} : Set where
+record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
   constructor mkBoolRing
   field
     imdepotency : (a : A) → (a · a) ≡ a
+
+  commutative : (a b : A) → (a · b) ≡ (b · a)
+  commutative a b = {!!}
+  
+  xor : (a : A) → (a + a) ≡ θ
+  xor a = {!!}
+        
   
 
 record RingWithOne (A : Set){{R : Ring A}} : Set where
