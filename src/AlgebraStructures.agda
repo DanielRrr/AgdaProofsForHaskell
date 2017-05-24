@@ -409,8 +409,38 @@ record LeeRing (A : Set){{R : Ring A}} : Set where
   field
     leeAxiom₁ : (a : A) → (a · a) ≡ θ
     leeAxiom₂ : (a b c : A) → (((a · b) · c) + (b · (c · a)) + (c · (a · b))) ≡ θ
+
+  lemma : (a b : A) → ((a + b) · (a + b)) ≡ ((a · b) + (b · a))
+  lemma a b =
+          (a + b) · (a + b)
+          ≡⟨ distrLaw₁ a b a b ⟩
+          (a · a + a · b + b · a + b · b)
+          ≡⟨ cong-+ (a · a) θ (a · b + b · a + b · b) (leeAxiom₁ a) ⟩
+          θ + a · b + b · a + b · b
+          ≡⟨ θ-unit (a · b + b · a + b · b) ⟩
+          a · b + b · a + b · b
+          ≡⟨ sym (+-assoc (a · b) (b · a) (b · b)) ⟩
+          (a · b + b · a) + b · b
+          ≡⟨ +-commute (a · b + b · a) (b · b) ⟩
+          (b · b + a · b + b · a)
+          ≡⟨ (cong-+ (b · b) θ (a · b + b · a) (leeAxiom₁ b)) ⟩
+          θ-unit (a · b + b · a)
+
+  lemma₁ : (a b : A) → (a · b + b · a) ≡ θ
+  lemma₁ a b = (a · b + b · a) ≡⟨ (sym (lemma a b)) ⟩ (leeAxiom₁ (a + b))
+
   anticommute : (a b : A) → (a · b) ≡ (invPlus (b · a))
-  anticommute a b = {!!}
+  anticommute a b = a · b
+                    ≡⟨ sym (θ-unit (a · b)) ⟩
+                    θ + a · b
+                    ≡⟨ cong-+ θ (invPlus (b · a) + (b · a)) (a · b) (sym (+-inv₁ (b · a))) ⟩
+                    (invPlus (b · a) + b · a) + a · b
+                    ≡⟨ +-assoc (invPlus (b · a)) (b · a) (a · b) ⟩
+                    invPlus (b · a) + b · a + a · b
+                    ≡⟨ +-commute (invPlus (b · a)) (b · a + a · b) ⟩
+                    ((b · a + a · b) + invPlus (b · a))
+                    ≡⟨ (cong-+ (b · a + a · b) θ (invPlus (b · a)) (lemma₁ b a)) ⟩
+                    (θ-unit (invPlus (b · a)))
   
 record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
   constructor mkBoolRing
