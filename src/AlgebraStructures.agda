@@ -386,13 +386,13 @@ record Ring (A : Set) : Set where
               b
               ≡⟨ eq₂ a b a f ⟩
               +-inv₂ a
-               
-  θProp₁ : (a : A) → a · θ ≡ θ
-  θProp₁ a = {!!}
+              
 
-  θProp₂ : (a : A) → θ · a ≡ θ
-  θProp₂ = {!!}
-  
+  θProp₁ : (a : A) → a · θ ≡ θ
+  θProp₁ a = begin
+             ({!!}
+             ≡⟨ {!!} ⟩
+             {!!})
   
 open Ring {{...}} public
 
@@ -447,11 +447,34 @@ record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
   field
     imdepotency : (a : A) → (a · a) ≡ a
 
+  xor : (a : A) → (a + a) ≡ θ
+  xor a = {!!}
+
+  invBooleProp : (a : A) → a ≡ invPlus a
+  invBooleProp a = begin
+               (a
+               ≡⟨ sym (imdepotency a) ⟩
+               (a · a)
+               ≡⟨ (cong-·₁ a (a + invPlus a + a) a (sym ((a + invPlus a + a) ≡⟨ (sym (+-assoc a (invPlus a) a)) ⟩
+               ((a + invPlus a) + a) ≡⟨ (cong-+ (a + invPlus a) θ a (+-inv₂ a)) ⟩ θ-unit a))) ⟩
+               (a + invPlus a + a) · a
+               ≡⟨ cong-·₂ a (a + invPlus a + a) (a + invPlus a + a) ((sym ((a + invPlus a + a) ≡⟨ (sym (+-assoc a (invPlus a) a)) ⟩
+               ((a + invPlus a) + a) ≡⟨ (cong-+ (a + invPlus a) θ a (+-inv₂ a)) ⟩ θ-unit a))) ⟩
+               (a + invPlus a + a) · (a + invPlus a + a)
+               ≡⟨ imdepotency (a + invPlus a + a) ⟩
+               (a + invPlus a + a)
+               ≡⟨ (+-commute a (invPlus a + a)) ⟩
+               ((invPlus a + a) + a)
+               ≡⟨ (+-assoc (invPlus a) a a) ⟩
+               (invPlus a + a + a
+               ≡⟨ +-commute (invPlus a) (a + a) ⟩
+               ((a + a) + invPlus a)
+               ≡⟨ (cong-+ (a + a) θ (invPlus a) (xor a)) ⟩
+               θ-unit (invPlus a)))
+
   commutative : (a b : A) → (a · b) ≡ (b · a)
   commutative a b = {!!}
   
-  xor : (a : A) → (a + a) ≡ θ
-  xor a = {!!}
         
   
 
