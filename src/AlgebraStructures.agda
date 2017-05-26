@@ -447,8 +447,61 @@ record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
   field
     imdepotency : (a : A) → (a · a) ≡ a
 
+  xorLemma : (a b : A) → (a + b + a · b + b · a) ≡ (a + b)
+  xorLemma a b = sym $
+             begin
+             a + b
+             ≡⟨ sym (imdepotency (a + b)) ⟩
+             (a + b) · (a + b)
+             ≡⟨ distrLaw₁ a b a b ⟩
+             a · a + a · b + b · a + b · b
+             ≡⟨ cong-+ (a · a) a (a · b + b · a + b · b) (imdepotency a) ⟩
+             a + a · b + b · a + b · b
+             ≡⟨ sym (+-assoc a (a · b) (b · a + b · b))  ⟩
+             (a + a · b) + b · a + b · b
+             ≡⟨ sym (+-assoc ((a + a · b)) (b · a) (b · b)) ⟩
+             ((a + a · b) + b · a) + b · b
+             ≡⟨ +-commute (((a + a · b) + b · a)) (b · b) ⟩
+             b · b + ((a + a · b) + b · a) 
+             ≡⟨ cong-+ (b · b) b ((a + a · b) + b · a) (imdepotency b) ⟩
+             b + (a + a · b) + b · a
+             ≡⟨ sym (+-assoc b  (a + a · b) (b · a)) ⟩
+             (b + (a + a · b)) + b · a
+             ≡⟨ cong-+ (b + (a + a · b)) (b + a + a · b) (b · a) refl ⟩
+             ((b + a + a · b) + b · a)
+             ≡⟨ (cong-+ (b + a + a · b) (a + b + a · b) (b · a)
+             ((b + a + a · b) ≡⟨ (sym (+-assoc b a (a · b))) ⟩
+             ((b + a) + a · b)
+             ≡⟨ (cong-+ (b + a) (a + b) (a · b) (+-commute b a)) ⟩
+             ((a + b) + a · b)
+             ≡⟨ +-assoc a b (a · b) ⟩
+             refl)) ⟩
+             ((a + b + a · b) + b · a)
+             ≡⟨ +-assoc a (b + a · b) (b · a) ⟩
+             a + (b + a · b) + b · a
+             ≡⟨ +-commute a ((b + a · b) + b · a) ⟩
+             (((b + a · b) + b · a) + a)
+             ≡⟨ (cong-+ ((b + a · b) + b · a) (b + a · b + b · a) a (((b + a · b) + b · a) ≡⟨ +-assoc b (a · b) (b · a) ⟩
+             refl)) ⟩
+             (b + a · b + b · a) + a
+             ≡⟨ +-commute (b + a · b + b · a) a ⟩
+             refl
+
+  imdepotentCollorary : (a b : A) → (a · b + b · a) ≡ θ
+  imdepotentCollorary a b = zeroProp₁ (a + b) (a · b + b · a)
+                            (begin (((a + b) + (a · b + b · a))
+                            ≡⟨ +-assoc a b (a · b + b · a) ⟩
+                            xorLemma a b))
+
   xor : (a : A) → (a + a) ≡ θ
-  xor a = {!!}
+  xor a = begin
+          a + a
+          ≡⟨ cong-+ a (a · a) a (sym (imdepotency a)) ⟩
+          (a · a + a)
+          ≡⟨ (+-commute (a · a) a) ⟩
+          ((a + a · a)
+          ≡⟨ (cong-+ a (a · a) (a · a) (sym (imdepotency a))) ⟩
+          (imdepotentCollorary a a))
 
   invBooleProp : (a : A) → a ≡ invPlus a
   invBooleProp a = begin
@@ -473,7 +526,18 @@ record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
                θ-unit (invPlus a)))
 
   commutative : (a b : A) → (a · b) ≡ (b · a)
-  commutative a b = {!!}
+  commutative a b = begin
+                    ((a · b)
+                    ≡⟨ sym (θ-unit (a · b)) ⟩
+                    (θ + a · b)
+                    ≡⟨ (cong-+ θ (a · b + b · a) (a · b) (sym (imdepotentCollorary a b))) ⟩
+                    ((a · b + b · a) + a · b
+                    ≡⟨ +-commute (a · b + b · a) (a · b) ⟩
+                    (a · b + a · b + b · a)
+                    ≡⟨ sym (+-assoc (a · b) (a · b) (b · a)) ⟩
+                    (a · b + a · b) + b · a
+                    ≡⟨ cong-+ (a · b + a · b) θ (b · a) (xor (a · b)) ⟩
+                    θ-unit (b · a)))
   
         
   
