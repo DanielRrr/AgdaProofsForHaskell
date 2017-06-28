@@ -188,6 +188,7 @@ record Group (A : Set) : Set where
                ≡⟨ mon-● (a ● (a ● inv a) ● inv (a ● inv a)) a (inv a ● inv (inv a)) (invLemma100500 a (a ● inv a)) ⟩
                (a ● inv a ● inv (inv a)) ≡⟨ invLemma100501 a (inv (inv a)) ⟩ refl)
                  
+                 
   cancel₁ : (a b c : A) → ((a ● b) ≡ (a ● c)) → b ≡ c
   cancel₁ a b c f = begin
                 b ≡⟨ (sym (ε-unit₂ b)) ⟩
@@ -241,7 +242,9 @@ record Group (A : Set) : Set where
                              (b ● inv b ● a ● b) ≡⟨ (sym (assoc-Group b (inv b) (a ● b))) ⟩
                              ((b ● inv b) ● a ● b) ≡⟨ (mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b)) ⟩ ε-unit₂ (a ● b))
                        
-                         
+
+  fact : (a b : A) → ((x : A) → (x ● x) ≡ ε) → (a ● b) ≡ (b ● a)
+  fact a b f = {!!}
                      
 open Group {{...}} public
   
@@ -388,12 +391,14 @@ record Ring (A : Set) : Set where
               +-inv₂ a
               
 
-  θProp₁ : (a : A) → a · θ ≡ θ
+  θProp₁ : (a : A) → θ · a ≡ a · θ
   θProp₁ a = begin
-             ({!!}
+             θ · a
+             ≡⟨ zeroLemma₂ a θ ⟩
+             θ · a + θ · a
              ≡⟨ {!!} ⟩
-             {!!})
-  
+             {!!}
+             
 open Ring {{...}} public
 
 record AssociativeRing (A : Set){{R : Ring A}} : Set where
@@ -538,6 +543,16 @@ record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
                     (a · b + a · b) + b · a
                     ≡⟨ cong-+ (a · b + a · b) θ (b · a) (xor (a · b)) ⟩
                     θ-unit (b · a)))
+  infixr 4 _∨_
+  _∨_ : A → A → A
+  a ∨ b = a + b + a · b
+
+  assoc∨ : (a b c : A) → (a ∨ (b ∨ c)) ≡ ((a ∨ b) ∨ c)
+  assoc∨ a b c = {!!}
+  
+
+  absorption₁ : (a b : A) → (a ∨ (a · b)) ≡ a
+  absorption₁ a b = {!!}
   
         
   

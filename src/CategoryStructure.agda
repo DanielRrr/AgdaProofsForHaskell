@@ -119,9 +119,7 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                 ((bind id (return mx)) ≡⟨ (unity-left-bind id mx) ⟩ refl)
   
   unity-right : ∀ {A}(mx : F A) → join (liftM return mx) ≡ mx
-  unity-right mx = (join (liftM return mx)) ≡⟨ refl ⟩ (bind id (liftM return mx))
-                   ≡⟨ assoc-bind (λ a → return (return a)) id mx ⟩
-                   (bind (λ a → bind id (return (return a))) mx)
+  unity-right mx = join (liftM return mx)
                    ≡⟨ {!!} ⟩
                    {!!}
   
@@ -131,10 +129,7 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                       refl
 
   naturality-join : ∀ {A B}(f : A → F B)(mmx : F ( F A )) → join (liftM (liftM f) mmx) ≡ liftM f (join mmx)
-  naturality-join f mx =
-                    (join (liftM (liftM f) mx))
-                    ≡⟨ {!unity-right-bind!} ⟩
-                    {!!}
+  naturality-join f mx = {!!}
 
 
   
@@ -175,9 +170,7 @@ record KleisliTriple (F : Set → Set) : Set₁ where
                      ≡⟨ {!!} ⟩ {!!}))
     
     pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ f g r = begin
-
-                   {!!}
+    pure-∘ f g r = {!!}
                    
   
   
