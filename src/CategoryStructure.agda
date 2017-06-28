@@ -24,6 +24,7 @@ record Functor (F : Set → Set) : Set₁ where
   _<$_ = fmap ∘ const
   _$>_ : ∀ {A B} → F A → B → F B
   _$>_ = flip (fmap ∘ const)
+open Functor {{...}} public
 
 record Applicative (F : Set → Set) : Set₁ where
   constructor mkApplicative
@@ -48,15 +49,15 @@ record Applicative (F : Set → Set) : Set₁ where
   _<**>_ : ∀ {A B} → F A → F (A → B) → F B
   _<**>_ = flip _<*>_
   functor : Functor F
-  functor = mkFunctor fmap fmap-id fmap-∘ where
-    fmap : ∀ {A B} → (A → B) → F A → F B
-    fmap f x = (pure f) <*> x
+  functor = mkFunctor map map-id map-∘ where
+    map : ∀ {A B} → (A → B) → F A → F B
+    map f x = (pure f) <*> x
 
-    fmap-id : {A : Set}(fx : F A) → fmap id fx ≡ id fx
-    fmap-id = pure-id
+    map-id : {A : Set}(fx : F A) → map id fx ≡ id fx
+    map-id = pure-id
     
-    fmap-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → fmap (g ∘ f) fx ≡ (fmap g ∘ fmap f) fx
-    fmap-∘ g f x = sym $ begin
+    map-∘ : {A B C : Set}(g : B → C)(f : A → B)(fx : F A) → map (g ∘ f) fx ≡ (map g ∘ map f) fx
+    map-∘ g f x = sym $ begin
       _<*>_ (pure g) (_<*>_ (pure f) x)
       ≡⟨ sym (pure-∘ (pure g) (pure f) x) ⟩
       _<*>_ (_<*>_ (_<*>_ (pure (λ f g → f ∘ g)) (pure g)) (pure f)) x
@@ -64,6 +65,7 @@ record Applicative (F : Set → Set) : Set₁ where
       (_<*>_ (_<*>_ (pure (λ f → g ∘ f)) (pure f)) x)
       ≡⟨ cong (λ fx → fx <*> x) (pure-hom (λ f → g ∘ f) f) ⟩
       refl
+open Applicative {{...}} public
 
 
 _⇒_ : ∀ (F G : Set → Set) → Set₁
@@ -75,9 +77,8 @@ record Foldable (T : Set → Set) : Set₁ where
   field
     foldr : ∀ {A B : Set} → (A → B → B) → B → T A → B 
 
-record Monad (F : Set → Set) (functor : Functor F) : Set₁ where
+record Monad (F : Set → Set) {{functor : Functor F}} : Set₁ where
   constructor mkMonad
-  open Functor functor using (fmap)
   field
     return : ∀ {A} → A → F A
     join : ∀ {A} → F (F A) → F A
