@@ -30,4 +30,4 @@ theorem₃ : {K : Set → Set}{{k : Applicative K}}{A B : Set} → (K A × K B) 
 theorem₃ = curry mult
 
 theorem₄ : {K : Set → Set}{{k : Applicative K}}{A B : Set} → K (A × B) → (K A × K B)
-theorem₄ p = {!!} , {!!}
+theorem₄ p = ((pure π₁) <*> p) , ((pure π₂) <*> p)
