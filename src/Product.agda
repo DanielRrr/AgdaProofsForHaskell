@@ -29,3 +29,11 @@ uniProd₁ f g x = refl
 
 uniProd₂ : ∀ {A B C : Set} → (f : C → A)(g : C → B)(x : C) → (π₂ (×-fun f g x)) ≡ g x
 uniProd₂ f g x = refl
+
+perm : {A B : Set} → (A × B) → (B × A)
+perm (x , x₁) = x₁ , x
+
+_⇔_ : Set → Set → Set
+P ⇔ Q = (P → Q) × (Q → P)
+
+infixr 0 _⇔_
