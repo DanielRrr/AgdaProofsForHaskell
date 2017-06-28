@@ -24,3 +24,6 @@ double = contradiction
 
 brower : {A : Set} → ¬ (¬ (¬ A)) → ¬ A
 brower f = f ∘ contradiction
+
+postulate fact : {A B : Set} → (¬ (¬ A) → ¬ (¬ B)) → ¬ (¬ (A → B))
+

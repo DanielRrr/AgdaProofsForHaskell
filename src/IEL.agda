@@ -39,10 +39,22 @@ consistency₁ : {K : Set → Set}{{k : Applicative K}} → ¬ (K ⊥)
 consistency₁ f = consist f elim⊥
 
 consistency₂ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A × (¬ A))
-consistency₂ p = ?
+consistency₂ (x , x₁) = consist x x₁
 
 consistency₃ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ A → ¬ (K A)
-consistency₃ f x = {!!}
+consistency₃ f x = consist x f
 
 consistency₄ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (¬ (K A → A))
-consistency₄ f = {!!}
+consistency₄ = fact (contraposition consistency₃)
+
+theorem₅ : {K : Set → Set}{{k : Applicative K}}{A : Set} → K (¬ A) → ¬ A
+theorem₅ = brower ∘ consist
+
+lemma : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A) → K (¬ A)
+lemma = pure ∘ (contraposition pure)
+
+lemma₁ : {K : Set → Set}{{k : Applicative K}}{A : Set} → K (¬ A) → ¬ (K A)
+lemma₁ x = {!!}
+
+theorem₆ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A) ⇔ K (¬ A)
+theorem₆ = lemma , lemma₁
