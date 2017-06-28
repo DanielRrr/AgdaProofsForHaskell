@@ -109,68 +109,6 @@ record KleisliTriple (F : Set → Set) : Set₁ where
   liftM f x = bind (λ x → return (f x)) x
   join : ∀ {A} → F (F A) → F A
   join f = f >>= id
-
-  liftM-id : {A : Set}(fx : F A) → liftM id fx ≡ id fx
-  liftM-id x = begin ((liftM id x) ≡⟨ unity-right-bind x ⟩ refl)
-
-  unity-left : ∀ {A}(mx : F A) → join (return mx) ≡ mx
-  unity-left mx =
-                (join (return mx)) ≡⟨ refl ⟩
-                ((bind id (return mx)) ≡⟨ (unity-left-bind id mx) ⟩ refl)
-  
-  unity-right : ∀ {A}(mx : F A) → join (liftM return mx) ≡ mx
-  unity-right mx = join (liftM return mx)
-                   ≡⟨ {!!} ⟩
-                   {!!}
-  
-  naturality-return : ∀ {A B} (f : A → F B)(x : A) → return (f x) ≡ liftM f (return x)
-  naturality-return f x = sym $ begin
-                      (liftM f (return x)) ≡⟨ (unity-left-bind (λ a → return (f a)) x) ⟩
-                      refl
-
-  naturality-join : ∀ {A B}(f : A → F B)(mmx : F ( F A )) → join (liftM (liftM f) mmx) ≡ liftM f (join mmx)
-  naturality-join f mx = {!!}
-
-
-  
-  appF : Applicative F
-  appF = mkApplicative pure _<*>_ pure-id pure-∘ pure-hom pure-inter where
-    pure : ∀ {A} → A → F A
-    pure = return
-    _<*>_ : ∀ {A B} → F (A → B) → F A → F B
-    _<*>_ fm x = fm >>= (λ f → x >>= λ s → return (f s) )
-    
-    pure-id : ∀ {X} (x : F X) → (pure id <*> x) ≡ x
-    pure-id x = begin
-            ((pure id <*> x)
-            ≡⟨ unity-left-bind (λ f → bind (λ y → return (f y)) x) id ⟩
-            (bind (λ y → return (id y)) x)
-            ≡⟨ unity-right-bind x ⟩
-            refl)
-
-    pure-hom : ∀ {S T} (f : S → T)(s : S) → (pure f <*> pure s) ≡ (pure (f s))
-    pure-hom f s = begin
-                 ((pure f <*> pure s)
-                 ≡⟨ unity-left-bind (λ f → bind (λ x → return (f x)) (return s)) f ⟩
-                 bind (λ x → return (f x)) (return s)
-                 ≡⟨ unity-left-bind (λ x → return (f x)) s ⟩
-                 refl)
-                 
-    pure-inter : ∀ {S T} (f : F (S → T))(s : S) → (f <*> pure s) ≡ (pure (λ f → f s) <*> f)
-    pure-inter f s = sym $ begin
-                     ((pure (λ f → f s) <*> f)
-                     ≡⟨ refl ⟩
-                     bind (λ a → bind (λ b → return (a b)) f) (return (λ f → f s))
-                     ≡⟨ unity-left-bind (λ a → bind (λ b → return (a b)) f) (λ f → f s) ⟩
-                     bind (λ b → return (b s)) f
-                     ≡⟨ refl ⟩
-                     liftM (λ f → f s) f ≡⟨ refl ⟩
-                     (sym $ begin
-                     (f <*> (return s))
-                     ≡⟨ {!!} ⟩ {!!}))
-    
-    pure-∘ : ∀ {R S T} (f : F (S → T))(g : F (R → S))(r : F R) → (((pure (λ f g → f ∘ g) <*> f) <*> g) <*> r) ≡ (f <*> (g <*> r))
-    pure-∘ f g r = {!!}
                    
   
   

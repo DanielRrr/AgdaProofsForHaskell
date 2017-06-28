@@ -391,13 +391,8 @@ record Ring (A : Set) : Set where
               +-inv₂ a
               
 
-  θProp₁ : (a : A) → θ · a ≡ a · θ
-  θProp₁ a = begin
-             θ · a
-             ≡⟨ zeroLemma₂ a θ ⟩
-             θ · a + θ · a
-             ≡⟨ {!!} ⟩
-             {!!}
+  θProp₁ : (a : A) → θ · a ≡ θ
+  θProp₁ a = {!!}
              
 open Ring {{...}} public
 
@@ -543,16 +538,6 @@ record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
                     (a · b + a · b) + b · a
                     ≡⟨ cong-+ (a · b + a · b) θ (b · a) (xor (a · b)) ⟩
                     θ-unit (b · a)))
-  infixr 4 _∨_
-  _∨_ : A → A → A
-  a ∨ b = a + b + a · b
-
-  assoc∨ : (a b c : A) → (a ∨ (b ∨ c)) ≡ ((a ∨ b) ∨ c)
-  assoc∨ a b c = {!!}
-  
-
-  absorption₁ : (a b : A) → (a ∨ (a · b)) ≡ a
-  absorption₁ a b = {!!}
   
         
   
