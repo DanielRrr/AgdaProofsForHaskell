@@ -54,7 +54,7 @@ lemma : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A) → K (¬ A
 lemma = pure ∘ (contraposition pure)
 
 lemma₁ : {K : Set → Set}{{k : Applicative K}}{A : Set} → K (¬ A) → ¬ (K A)
-lemma₁ x = {!!}
+lemma₁ = consistency₃ ∘ theorem₅
 
 theorem₆ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A) ⇔ K (¬ A)
 theorem₆ = lemma , lemma₁
