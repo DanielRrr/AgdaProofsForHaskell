@@ -58,3 +58,9 @@ lemma₁ = consistency₃ ∘ theorem₅
 
 theorem₆ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A) ⇔ K (¬ A)
 theorem₆ = lemma , lemma₁
+
+theorem₇ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (K A) ⇔ ¬ A
+theorem₇ = (theorem₅ ∘ lemma) , (lemma₁ ∘ pure)
+
+theorem₈ : {K : Set → Set}{{k : Applicative K}}{A : Set} → ¬ (¬(K A) × ¬ (K (¬ A)))
+theorem₈ (x , x₁) = x₁ (lemma x)
