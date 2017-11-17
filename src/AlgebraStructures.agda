@@ -9,35 +9,34 @@ record Magma (A : Set) : Set where
   infixr 4 _●_
   field
     _●_ : A → A → A
+open Magma{{...}} public
 
-record Semigroup (A : Set) : Set where
+record Semigroup (A : Set){{M : Magma A}} : Set where
   constructor mkSemigroup
-  infixr 4 _●_
   field
-    _●_ : A → A → A
-    assoc-semigroup : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
+    assoc : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
 
-record Monoid (A : Set) : Set where
+  mon-● : (a b c : A) → a ≡ b → (a ● c) ≡ (b ● c)
+  mon-● a b c refl = refl
+
+  mon-●₁ : (a b c : A) → a ≡ b → (c ● a) ≡ (c ● b)
+  mon-●₁ a b c refl = refl
+
+  cancellation : (a b : A) → ((x : A) → ((x ● x ● x) ≡ x)) → (a ● b) ≡ (b ● a)
+  cancellation a b f = {!!}
+open Semigroup{{...}} public
+
+record Monoid (A : Set){{M : Magma A}}{{S : Semigroup A}} : Set where
   constructor mkMonoid
-  infixr 4 _●_
   field
     ε : A
-    _●_ : A → A → A
     ε-unit₁ : (x : A) → (x ● ε) ≡ x
-    ε-unit₂ : (x : A) → (ε ● x) ≡ x 
-    assoc-Monoid : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
-  semiA : Semigroup A
-  semiA = mkSemigroup _●_ assoc-Monoid
+    ε-unit₂ : (x : A) → (ε ● x) ≡ x
+open Monoid{{...}} public
 
-record Group (A : Set) : Set where
+record Group (A : Set){{M : Magma A}}{{S : Semigroup A}}{{Mo : Monoid A}} : Set where
   constructor mkGroup
-  infixr 4 _●_
   field
-    ε : A
-    _●_ : A → A → A
-    ε-unit₁ : (x : A) → (x ● ε) ≡ x
-    ε-unit₂ : (x : A) → (ε ● x) ≡ x 
-    assoc-Group : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
     inv : A → A
     inv-axiom₁ : (a : A) → (inv a ● a) ≡ ε
     inv-axiom₂ : (a : A) → (a ● (inv a)) ≡ ε
@@ -53,18 +52,6 @@ record Group (A : Set) : Set where
   
   mult : A → A → A
   mult x y = x ● y
-
-  semiA : Semigroup A
-  semiA = mkSemigroup _●_ assoc-Group
-  
-  monA : Monoid A
-  monA = mkMonoid ε _●_ ε-unit₁ ε-unit₂ assoc-Group
-
-  mon-● : (a b c : A) → a ≡ b → (a ● c) ≡ (b ● c)
-  mon-● a b c refl = refl
-
-  mon-●₁ : (a b c : A) → a ≡ b → (c ● a) ≡ (c ● b)
-  mon-●₁ a b c refl = refl
 
   neut-Prop : (a : A) → (a ● ε) ≡ (ε ● a)
   neut-Prop a = trans (ε-unit₁ a) (sym (ε-unit₂ a))
@@ -94,7 +81,7 @@ record Group (A : Set) : Set where
   jS a b = inv-axiom₂ (a ● b)
   
   jacketShirtLemma₂ : (a b : A) → (((inv b) ● (inv a) ● a) ● b) ≡ ε
-  jacketShirtLemma₂ a b = begin (((inv b) ● (inv a) ● a) ● b) ≡⟨ (assoc-Group (inv b) (inv a ● a) b) ⟩
+  jacketShirtLemma₂ a b = begin (((inv b) ● (inv a) ● a) ● b) ≡⟨ (assoc (inv b) (inv a ● a) b) ⟩
                           ((inv b) ● ((inv a ● a) ● b) ≡⟨ invElim (inv b) a b ⟩
                           inv-axiom₁ b)
 
@@ -144,7 +131,7 @@ record Group (A : Set) : Set where
   invLemma100501 : (a b : A) → (a ● inv a ● b) ≡ b
   invLemma100501 a b =
                      (a ● inv a ● b)
-                     ≡⟨ sym (assoc-Group a (inv a) b) ⟩
+                     ≡⟨ sym (assoc a (inv a) b) ⟩
                      ((a ● inv a) ● b) ≡⟨ (mon-● (a ● inv a) ε b (inv-axiom₂ a)) ⟩ (ε-unit₂ b)
 
   invLemma100502 : (a b : A) → (inv a ● (a ● b) ● inv (a ● b)) ≡ inv a
@@ -174,14 +161,14 @@ record Group (A : Set) : Set where
                (_●_ a (inv (a ∶ a)))
                ≡⟨ cong (_●_ a) (divInv (a ∶ a)) ⟩
                _●_ a (_●_ (_●_ (_●_ a (inv a)) (inv (_●_ a (inv a)))) (inv (_●_ a (inv a))))
-               ≡⟨ sym (assoc-Group a (_●_ (_●_ a (inv a)) (inv (a ● inv a))) (inv (a ● inv a))) ⟩
+               ≡⟨ sym (assoc a (_●_ (_●_ a (inv a)) (inv (a ● inv a))) (inv (a ● inv a))) ⟩
                ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv (a ● inv a))
                ≡⟨ cong (_●_ (_●_ a (_●_ (_●_ a (inv a)) (inv (a ● inv a))))) (jacketShirt a (inv a)) ⟩
                ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv (inv a) ● inv a)
-               ≡⟨ assoc-Group a (_●_ (_●_ a (inv a)) (inv (a ● inv a))) (_●_ (inv (inv a)) (inv a)) ⟩
+               ≡⟨ assoc a (_●_ (_●_ a (inv a)) (inv (a ● inv a))) (_●_ (inv (inv a)) (inv a)) ⟩
                (a ● ((a ● inv a) ● inv (a ● inv a)) ● inv (inv a) ● inv a) ≡⟨ refl ⟩
                (a ● ((a ● inv a) ● inv (a ● inv a)) ● (inv (inv a) ● inv a))
-               ≡⟨ sym (assoc-Group a ((a ● inv a) ● inv (a ● inv a)) ((inv (inv a) ● inv a))) ⟩
+               ≡⟨ sym (assoc a ((a ● inv a) ● inv (a ● inv a)) ((inv (inv a) ● inv a))) ⟩
                ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv (inv a) ● inv a)
                ≡⟨ (cong (_●_ (_●_ a (_●_ (_●_ a (inv a)) (inv (a ● inv a))))) (sym (inv-Prop (inv a)))) ⟩
                ((a ● (a ● inv a) ● inv (a ● inv a)) ● inv a ● inv (inv a))
@@ -193,9 +180,9 @@ record Group (A : Set) : Set where
   cancel₁ a b c f = begin
                 b ≡⟨ (sym (ε-unit₂ b)) ⟩
                 (ε ● b) ≡⟨ mon-● ε (inv a ● a) b (sym (inv-axiom₁ a)) ⟩
-                ((inv a ● a) ● b) ≡⟨ (assoc-Group (inv a) a b) ⟩
+                ((inv a ● a) ● b) ≡⟨ (assoc (inv a) a b) ⟩
                 (inv a ● a ● b) ≡⟨ (cong (_●_ (inv a)) f) ⟩
-                (inv a ● a ● c) ≡⟨ (sym (assoc-Group (inv a) a c)) ⟩
+                (inv a ● a ● c) ≡⟨ (sym (assoc (inv a) a c)) ⟩
                 (((inv a ● a) ● c) ≡⟨ (mon-● (inv a ● a) ε c (inv-axiom₁ a)) ⟩
                 ε-unit₂ c)
 
@@ -206,11 +193,11 @@ record Group (A : Set) : Set where
                     a ● ε
                     ≡⟨ mon-●₁ ε (c ● inv c) a (sym (inv-axiom₂ c)) ⟩
                     a ● c ● inv c
-                    ≡⟨ sym (assoc-Group a c (inv c)) ⟩
+                    ≡⟨ sym (assoc a c (inv c)) ⟩
                     (a ● c) ● inv c
                     ≡⟨ mon-● (a ● c) (b ● c) (inv c) f ⟩
                     (b ● c) ● inv c
-                    ≡⟨ assoc-Group b c (inv c) ⟩
+                    ≡⟨ assoc b c (inv c) ⟩
                     b ● c ● inv c
                     ≡⟨ mon-●₁ (c ● inv c) ε b (inv-axiom₂ c) ⟩
                     ε-unit₁ b
@@ -225,10 +212,10 @@ record Group (A : Set) : Set where
                       (begin
                       ((inv (inv b ● a ● b)) ≡⟨ (jacketShirt (inv b) (a ● b)) ⟩
                       (inv (a ● b) ● inv (inv b)) ≡⟨ (cong (_●_ (inv (a ● b))) (invTheorem b)) ⟩
-                      (inv (a ● b) ● b ≡⟨ mon-● (inv (a ● b)) (inv b ● inv a) b (jacketShirt a b) ⟩ assoc-Group (inv b) (inv a) b)))) ⟩
-                      ((inv b ● inv a ● b) ● a) ≡⟨ (assoc-Group (inv b) (inv a ● b) a) ⟩
+                      (inv (a ● b) ● b ≡⟨ mon-● (inv (a ● b)) (inv b ● inv a) b (jacketShirt a b) ⟩ assoc (inv b) (inv a) b)))) ⟩
+                      ((inv b ● inv a ● b) ● a) ≡⟨ (assoc (inv b) (inv a ● b) a) ⟩
                       inv b ● (inv a ● b) ● a
-                      ≡⟨ mon-●₁ ((inv a ● b) ● a) (inv a ● b ● a) (inv b) (assoc-Group (inv a) b a) ⟩
+                      ≡⟨ mon-●₁ ((inv a ● b) ● a) (inv a ● b ● a) (inv b) (assoc (inv a) b a) ⟩
                       refl))
 
   commmutatorTheorem : (a b : A) → ((commutator a b) ≡ ε) → (a ● b) ≡ (b ● a)
@@ -237,9 +224,9 @@ record Group (A : Set) : Set where
                              (b ● a) ≡⟨ (mon-●₁ a (a ● commutator a b) b (sym ((a ● commutator a b) ≡⟨ (mon-●₁ (commutator a b) ε a f) ⟩ ε-unit₁ a))) ⟩
                              (b ● a ● commutator a b) ≡⟨ refl ⟩
                              (b ● a ● (inv a ● inv b ● a ● b))
-                             ≡⟨ mon-●₁ (a ● (inv a ● inv b ● a ● b)) (inv b ● a ● b) b ((a ● inv a ● inv b ● a ● b) ≡⟨ sym (assoc-Group a (inv a) (inv b ● a ● b)) ⟩
+                             ≡⟨ mon-●₁ (a ● (inv a ● inv b ● a ● b)) (inv b ● a ● b) b ((a ● inv a ● inv b ● a ● b) ≡⟨ sym (assoc a (inv a) (inv b ● a ● b)) ⟩
                              ((a ● inv a) ● inv b ● a ● b) ≡⟨ (mon-● (a ● inv a) ε (inv b ● a ● b) (inv-axiom₂ a)) ⟩ ε-unit₂ (inv b ● a ● b)) ⟩
-                             (b ● inv b ● a ● b) ≡⟨ (sym (assoc-Group b (inv b) (a ● b))) ⟩
+                             (b ● inv b ● a ● b) ≡⟨ (sym (assoc b (inv b) (a ● b))) ⟩
                              ((b ● inv b) ● a ● b) ≡⟨ (mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b)) ⟩ ε-unit₂ (a ● b))
                        
 
@@ -248,7 +235,7 @@ record Group (A : Set) : Set where
                      
 open Group {{...}} public
   
-record Abelian (A : Set){{GR : Group A}} : Set where
+record Abelian (A : Set){{M : Magma A}}{{S : Semigroup A}}{{Mon : Monoid A}}{{GR : Group A}} : Set where
   constructor mkAbelian
   field
     commute : (a b : A) → (a ● b) ≡ (b ● a)
