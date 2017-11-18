@@ -16,12 +16,6 @@ record Semigroup (A : Set){{M : Magma A}} : Set where
   field
     assoc : (x y z : A) → ((x ● y) ● z) ≡ (x ● (y ● z))
 
-  mon-● : (a b c : A) → a ≡ b → (a ● c) ≡ (b ● c)
-  mon-● a b c refl = refl
-
-  mon-●₁ : (a b c : A) → a ≡ b → (c ● a) ≡ (c ● b)
-  mon-●₁ a b c refl = refl
-
   cancellation : (a b : A) → ((x : A) → ((x ● x ● x) ≡ x)) → (a ● b) ≡ (b ● a)
   cancellation a b f = {!!}
 open Semigroup{{...}} public
@@ -32,7 +26,13 @@ record Monoid (A : Set){{M : Magma A}}{{S : Semigroup A}} : Set where
     ε : A
     ε-unit₁ : (x : A) → (x ● ε) ≡ x
     ε-unit₂ : (x : A) → (ε ● x) ≡ x
+
+  neut-Prop : (a : A) → (a ● ε) ≡ (ε ● a)
+  neut-Prop a = trans (ε-unit₁ a) (sym (ε-unit₂ a))
+  
 open Monoid{{...}} public
+
+
 
 record Group (A : Set){{M : Magma A}}{{S : Semigroup A}}{{Mo : Monoid A}} : Set where
   constructor mkGroup
@@ -40,7 +40,13 @@ record Group (A : Set){{M : Magma A}}{{S : Semigroup A}}{{Mo : Monoid A}} : Set 
     inv : A → A
     inv-axiom₁ : (a : A) → (inv a ● a) ≡ ε
     inv-axiom₂ : (a : A) → (a ● (inv a)) ≡ ε
-    
+
+  mon-● : (a b c : A) → a ≡ b → (a ● c) ≡ (b ● c)
+  mon-● a b c refl = refl
+
+  mon-●₁ : (a b c : A) → a ≡ b → (c ● a) ≡ (c ● b)
+  mon-●₁ a b c refl = refl
+
   commutator : (a b : A) → A
   commutator a b = (inv a) ● (inv b) ● a ● b
   
@@ -53,9 +59,6 @@ record Group (A : Set){{M : Magma A}}{{S : Semigroup A}}{{Mo : Monoid A}} : Set 
   mult : A → A → A
   mult x y = x ● y
 
-  neut-Prop : (a : A) → (a ● ε) ≡ (ε ● a)
-  neut-Prop a = trans (ε-unit₁ a) (sym (ε-unit₂ a))
-  
   inv-Prop : (a : A) → (a ● (inv a)) ≡ ((inv a) ● a)
   inv-Prop a = trans (inv-axiom₂ a) (sym (inv-axiom₁ a))
 
@@ -262,6 +265,9 @@ record Ring (A : Set) : Set where
   cong-+ : (a b c : A) → a ≡ b → (a + c) ≡ (b + c)
   cong-+ a b c refl = refl
 
+  cong-+₁ : (a b c : A) → a ≡ b → (c + a) ≡ (c + b)
+  cong-+₁ a b c refl = refl
+
   cong-·₁ : (a b c : A) → a ≡ b → (a · c) ≡ (b · c)
   cong-·₁ a b c refl = refl
 
@@ -378,8 +384,18 @@ record Ring (A : Set) : Set where
               +-inv₂ a
               
 
-  θProp₁ : (a : A) → θ · a ≡ θ
-  θProp₁ a = {!!}
+  θProp₁ : (a : A) → a · θ ≡ θ
+  θProp₁ a = begin
+             (a · θ) ≡⟨ sym (+-θ (a · θ)) ⟩
+             (a · θ + θ)
+             ≡⟨ cong-+₁ θ (a · θ + (invPlus (a · θ))) (a · θ) (sym (+-inv₂ (a · θ))) ⟩
+             (a · θ + a · θ + invPlus (a · θ))
+             ≡⟨ sym (+-assoc (a · θ) (a · θ) (invPlus (a · θ))) ⟩
+             ((a · θ + a · θ) + invPlus (a · θ))
+             ≡⟨ cong-+ (a · θ + a · θ) (a · (θ + θ)) (invPlus (a · θ)) (sym (·-distr-right a θ θ)) ⟩
+             (a · (θ + θ) + invPlus (a · θ))
+             ≡⟨ cong-+ (a · (θ + θ)) (a · θ) (invPlus (a · θ)) ((a · (θ + θ)) ≡⟨ (cong-·₂ (θ + θ) θ a (+-θ θ)) ⟩ refl) ⟩
+             +-inv₂ (a · θ)
              
 open Ring {{...}} public
 
