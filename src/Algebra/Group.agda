@@ -198,10 +198,6 @@ record Group (A : Set){{Mo : Monoid A}} : Set where
                              (b ● inv b ● a ● b) ≡⟨ (sym (assoc b (inv b) (a ● b))) ⟩
                              ((b ● inv b) ● a ● b) ≡⟨ (mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b)) ⟩ ε-unit₂ (a ● b))
 
-
-  fact : (a b : A) → ((x : A) → (x ● x) ≡ ε) → (a ● b) ≡ (b ● a)
-  fact a b f = {!!}
-
 open Group {{...}} public
 
 record Abelian (A : Set){{Mon : Monoid A}}{{GR : Group A}} : Set where
@@ -215,5 +211,6 @@ record GroupHomomorphism {{A}}{{M : Monoid A}}{{G : Group A}}{{B}}{{M' : Monoid 
   constructor mkGroupHomomorphism
   field
     respInv : (a : A) → f (inv a) ≡ inv (f a)
-
 open GroupHomomorphism{{...}} public
+
+data Image {{A}}{{M : Monoid A}}{{G : Group A}}{{B}}{{M' : Monoid B}}{{G' : Group B}}{{f : A → B}} : Set where

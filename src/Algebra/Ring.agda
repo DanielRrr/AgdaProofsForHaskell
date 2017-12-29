@@ -304,14 +304,13 @@ record BoolRing (A : Set){{Q : Ring A}}{{R : AssociativeRing A}} : Set where
                     θ-unit (b · a)))
 
 
-
-
 record RingWithOne (A : Set){{R : Ring A}} : Set where
   constructor mkAssocRingWithOne
   field
-    ε : A
-    ·-unit₁ : (a : A) → (a · ε) ≡ a
-    ·-unit₂ : (a : A) → (ε · a) ≡ a
+    Ε : A
+    ·-unit₁ : (a : A) → (a · Ε) ≡ a
+    ·-unit₂ : (a : A) → (Ε · a) ≡ a
+open RingWithOne {{...}} public
 
 
 record CommutativeRing (A : Set){{R : Ring A}} : Set where
