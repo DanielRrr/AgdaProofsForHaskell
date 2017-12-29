@@ -1,5 +1,10 @@
 module CategoryStructure where
 
+open import Function
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans; subst)
+open import Identity
+open Relation.Binary.PropositionalE
+
 morAssoc : {A B C D : Set} → (f : A → B)(g : B → C)(h : C → D)(x : A) → (h ∘ (g ∘ f)) x ≡ ((h ∘ g) ∘ f) x
 morAssoc f g h x = refl
 
