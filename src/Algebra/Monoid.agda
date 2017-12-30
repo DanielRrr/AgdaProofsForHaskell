@@ -77,3 +77,16 @@ record MonoidHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{M' : Monoid B}}(f 
   field
     resp● : (a b : A) → (f (a ● b)) ≡ ((f a) ● (f b))
 open MonoidHomomorphism{{...}} public
+
+∘-Homo : (A : Set)(B : Set)(C : Set)(f : A → B)(g : B → C)
+             {{M₁ : Monoid A}}{{M₂ : Monoid B}}{{M₃ : Monoid C}}{{MH₁ : MonoidHomomorphism A B f}}{{MH₂ : MonoidHomomorphism B C g}}
+             → MonoidHomomorphism A C (g ∘ f)
+∘-Homo A B C f g = mkMonoidHomomorphism λ a → λ b →
+                                              begin
+                                              (g ∘ f) (a ● b)
+                                              ≡⟨ refl ⟩
+                                              g (f (a ● b))
+                                              ≡⟨ cong g (resp● a b) ⟩
+                                              g ((f a) ● (f b))
+                                              ≡⟨ resp● (f a) (f b) ⟩
+                                              refl
