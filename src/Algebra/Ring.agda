@@ -160,6 +160,30 @@ record Ring (A : Set) : Set where
 
 open Ring {{...}} public
 
+record RingHomomorphism (A : Set)(B : Set){{R₁ : Ring A}}{{R₂ : Ring B}}(f : A → B) : Set where
+  constructor mkRingHomomorphism
+  field
+    resp+ : (a b : A) → f (a + b) ≡ ((f a) + (f b))
+    resp· : (a b : A) → f (a · b) ≡ ((f a) · (f b))
+
+  respΘ : f θ ≡ θ
+  respΘ = sym $ begin
+          (θ
+          ≡⟨ sym (+-inv₁ (f θ)) ⟩
+          invPlus (f θ) + f θ
+          ≡⟨ cong-+₁ (f θ) (f (θ + θ)) (invPlus (f θ)) (cong f (sym (+-θ θ))) ⟩
+          invPlus (f θ) + f (θ + θ)
+          ≡⟨ cong-+₁ (f (θ + θ)) ((f θ) + (f θ)) (invPlus (f θ)) (resp+ θ θ) ⟩
+          invPlus (f θ) + f θ + f θ
+          ≡⟨ sym (+-assoc (invPlus (f θ)) (f θ) (f θ)) ⟩
+          (invPlus (f θ) + f θ) + f θ
+          ≡⟨ cong-+ (invPlus (f θ) + f θ) θ (f θ) (+-inv₁ (f θ)) ⟩
+          θ + f θ
+          ≡⟨ +-commute θ (f θ) ⟩
+          +-θ {!f θ!})
+  
+open RingHomomorphism {{...}} public
+
 record AssociativeRing (A : Set){{R : Ring A}} : Set where
   constructor mkAssocRing
   field
