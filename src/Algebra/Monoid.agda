@@ -72,7 +72,7 @@ record Monoid (A : Set) : Set where
 
 open Monoid{{...}} public
 
-record MonoidHomomorphism {{A}}{{M : Monoid A}}{{B}}{{M' : Monoid B}}(f : A → B) : Set where
+record MonoidHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{M' : Monoid B}}(f : A → B) : Set where
   constructor mkMonoidHomomorphism
   field
     resp● : (a b : A) → (f (a ● b)) ≡ ((f a) ● (f b))

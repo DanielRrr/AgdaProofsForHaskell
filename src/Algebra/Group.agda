@@ -4,6 +4,7 @@ open import Monoid
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; setoid; sym; trans; subst)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function
+open import Data.Product
 
 record Group (A : Set){{Mo : Monoid A}} : Set where
   constructor mkGroup
@@ -207,10 +208,29 @@ record Abelian (A : Set){{Mon : Monoid A}}{{GR : Group A}} : Set where
 open Abelian {{...}} public
 
 
-record GroupHomomorphism {{A}}{{M : Monoid A}}{{G : Group A}}{{B}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B) : Set where
+record GroupHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{MH : MonoidHomomorphism A B f}} : Set where
   constructor mkGroupHomomorphism
   field
-    respInv : (a : A) → f (inv a) ≡ inv (f a)
+    resp-● : (a b : A) → (f (a ● b)) ≡ ((f a) ● (f b))
+
+  resp-ε : f ε ≡ ε
+  resp-ε = begin
+           (f ε
+           ≡⟨ {!!} ⟩
+           {!!})
+
+  resp-inv : (a : A) → f (inv a) ≡ inv (f a)  
+  resp-inv = {!!}
 open GroupHomomorphism{{...}} public
 
-data Image {{A}}{{M : Monoid A}}{{G : Group A}}{{B}}{{M' : Monoid B}}{{G' : Group B}}{{f : A → B}} : Set where
+record Image (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
+  constructor mkImage
+  field
+    image : Σ B (λ y → (Σ A (λ x → f x ≡ y)))
+open Image {{...}} public
+
+record Kernel (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
+  constructor mkKernel
+  field
+    kernel : Σ A (λ x → f x ≡ ε)
+open Kernel {{...}} public
