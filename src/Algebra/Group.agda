@@ -210,27 +210,28 @@ open Abelian {{...}} public
 
 record GroupHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{MH : MonoidHomomorphism A B f}} : Set where
   constructor mkGroupHomomorphism
-  field
-    resp-● : (a b : A) → (f (a ● b)) ≡ ((f a) ● (f b))
 
   resp-ε : f ε ≡ ε
-  resp-ε = begin
-           (f ε
-           ≡⟨ {!!} ⟩
-           {!!})
+  resp-ε = sym $ begin
+           (ε
+           ≡⟨ sym (inv-axiom₁ (f ε)) ⟩
+           inv (f ε) ● f ε
+           ≡⟨ mon-●₁ (f ε) (f (ε ● ε)) (inv (f ε)) (cong f (sym (ε-unit₁ ε))) ⟩
+           (inv (f ε) ● f (ε ● ε))
+           ≡⟨ mon-●₁ (f (ε ● ε)) ((f ε) ● (f ε)) (inv (f ε)) (resp● ε ε) ⟩
+           inv (f ε) ● f ε ● f ε
+           ≡⟨ sym (assoc (inv (f ε)) (f ε) (f ε)) ⟩
+           ((inv (f ε) ● f ε) ● f ε)
+           ≡⟨ mon-● (inv (f ε) ● f ε) ε (f ε) (inv-axiom₁ (f ε)) ⟩
+           ε-unit₂ (f ε))
 
   resp-inv : (a : A) → f (inv a) ≡ inv (f a)  
-  resp-inv = {!!}
-open GroupHomomorphism{{...}} public
+  resp-inv a = {!!}
+open GroupHomomorphism{{...}} public 
 
-record Image (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
-  constructor mkImage
-  field
-    image : Σ B (λ y → (Σ A (λ x → f x ≡ y)))
-open Image {{...}} public
+data Image (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
+  image : Σ B (λ y → (Σ A (λ x → f x ≡ y))) → Image A B f
 
-record Kernel (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
-  constructor mkKernel
-  field
-    kernel : Σ A (λ x → f x ≡ ε)
-open Kernel {{...}} public
+data Ker (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
+  kernel : Σ A (λ x → f x ≡ ε) → Ker A B f
+
