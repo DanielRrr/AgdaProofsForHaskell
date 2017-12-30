@@ -226,7 +226,20 @@ record GroupHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' :
            ε-unit₂ (f ε))
 
   resp-inv : (a : A) → f (inv a) ≡ inv (f a)  
-  resp-inv a = {!!}
+  resp-inv a = begin
+               f (inv a)
+               ≡⟨ sym (ε-unit₁ (f (inv a))) ⟩
+               f (inv a) ● ε
+               ≡⟨ mon-●₁ ε (f a ● inv (f a)) (f (inv a)) (sym (inv-axiom₂ (f a))) ⟩
+               f (inv a) ● f a ● inv (f a)
+               ≡⟨ sym (assoc (f (inv a)) (f a) (inv (f a))) ⟩
+               (f (inv a) ● f a) ● inv (f a)
+               ≡⟨ mon-● (f (inv a) ● f a) (f (inv a ● a)) ( inv (f a)) (sym (resp● (inv a) a)) ⟩
+               f (inv a ● a) ● inv (f a)
+               ≡⟨ mon-● ( f (inv a ● a)) (f ε) (inv (f a)) (cong f (inv-axiom₁ a)) ⟩
+               f ε ● inv (f a)
+               ≡⟨ mon-● (f ε) ε (inv (f a)) resp-ε ⟩
+               ε-unit₂ (inv (f a))
 open GroupHomomorphism{{...}} public 
 
 data Image (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
