@@ -17,11 +17,21 @@ record Ring (A : Set) : Set where
       +-assoc : (a b c : A) → ((a + b) + c) ≡ (a + (b + c))
       +-commute : (a b : A) → (a + b) ≡ (b + a)
       +-inv₁ : (a : A) → ((invPlus a) + a) ≡ θ
-      +-inv₂ : (a : A) → (a + invPlus a) ≡ θ
       +-θ : (a : A) → (a + θ) ≡ a
-      θ-unit : (x : A) → (θ + x) ≡ x
       ·-distr-left : (a b c : A) → ((a + b) · c) ≡ ((a · c) + (b · c))
       ·-distr-right : (a b c : A) → (a · (b + c)) ≡ ((a · b) + (a · c))
+
+  +-inv₂ : (a : A) → (a + invPlus a) ≡ θ
+  +-inv₂ a = begin
+             (a + invPlus a
+             ≡⟨ +-commute a (invPlus a) ⟩
+             +-inv₁ a)
+
+  θ-unit : (a : A) → (θ + a) ≡ a
+  θ-unit a = begin
+             ((θ + a)
+             ≡⟨ (+-commute θ a) ⟩
+             (+-θ a))
 
   cong-+ : (a b c : A) → a ≡ b → (a + c) ≡ (b + c)
   cong-+ a b c refl = refl
@@ -180,7 +190,23 @@ record RingHomomorphism (A : Set)(B : Set){{R₁ : Ring A}}{{R₂ : Ring B}}(f :
           ≡⟨ cong-+ (invPlus (f θ) + f θ) θ (f θ) (+-inv₁ (f θ)) ⟩
           θ + f θ
           ≡⟨ +-commute θ (f θ) ⟩
-          +-θ {!f θ!})
+          +-θ (f θ))
+
+  respInvPlus : (a : A) → f (invPlus a) ≡ invPlus (f a)
+  respInvPlus a = begin
+                  (f (invPlus a)
+                  ≡⟨ sym (+-θ (f (invPlus a))) ⟩
+                  f (invPlus a) + θ
+                  ≡⟨ cong-+₁ θ (f a + invPlus (f a)) (f (invPlus a)) (sym (+-inv₂ (f a))) ⟩
+                  f (invPlus a) + f a + invPlus (f a)
+                  ≡⟨ sym (+-assoc (f (invPlus a)) (f a) (invPlus (f a))) ⟩
+                  (f (invPlus a) + f a) + invPlus (f a)
+                  ≡⟨ cong-+ (f (invPlus a) + f a) (f (invPlus a + a)) (invPlus (f a)) (sym (resp+ (invPlus a) a)) ⟩
+                  f (invPlus a + a) + invPlus (f a)
+                  ≡⟨ cong-+ (f (invPlus a + a)) (f θ) (invPlus (f a)) (cong f (+-inv₁ a)) ⟩
+                  f θ + invPlus (f a)
+                  ≡⟨ cong-+ (f θ) θ (invPlus (f a)) respΘ ⟩
+                  θ-unit (invPlus (f a)))
   
 open RingHomomorphism {{...}} public
 
