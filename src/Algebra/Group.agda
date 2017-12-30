@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 module Group where
 
 open import Monoid
@@ -5,6 +7,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; seto
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function
 open import Data.Product
+open import Data.List
 
 record Group (A : Set){{Mo : Monoid A}} : Set where
   constructor mkGroup
@@ -199,6 +202,20 @@ record Group (A : Set){{Mo : Monoid A}} : Set where
                              (b ● inv b ● a ● b) ≡⟨ (sym (assoc b (inv b) (a ● b))) ⟩
                              ((b ● inv b) ● a ● b) ≡⟨ (mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b)) ⟩ ε-unit₂ (a ● b))
 
+  leftCoset : (a : A) → List A → List A
+  leftCoset a [] = []
+  leftCoset a (x ∷ xs) = (a ● x) ∷ leftCoset a xs
+
+  rightCoset : List A → (a : A) → List A
+  rightCoset [] a = []
+  rightCoset (x ∷ xs) a = (x ● a) ∷ rightCoset xs a
+
+  eq-leftCoset : (a b : A) → (xs : List A) → (a ≡ b) → leftCoset a xs ≡ leftCoset b xs
+  eq-leftCoset a b xs refl = refl
+
+  eq-rightCoset :  (a b : A) → (xs : List A) → (a ≡ b) → rightCoset xs a ≡ rightCoset xs b
+  eq-rightCoset a b xs refl = refl
+
 open Group {{...}} public
 
 record Abelian (A : Set){{Mon : Monoid A}}{{GR : Group A}} : Set where
@@ -240,7 +257,7 @@ record GroupHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' :
                f ε ● inv (f a)
                ≡⟨ mon-● (f ε) ε (inv (f a)) resp-ε ⟩
                ε-unit₂ (inv (f a))
-open GroupHomomorphism{{...}} public 
+open GroupHomomorphism{{...}} public
 
 data Image (A : Set)(B : Set){{M : Monoid A}}{{G : Group A}}{{M' : Monoid B}}{{G' : Group B}}(f : A → B){{GH : MonoidHomomorphism A B f}}{{GH : GroupHomomorphism A B f}} : Set where
   image : Σ B (λ y → (Σ A (λ x → f x ≡ y))) → Image A B f
