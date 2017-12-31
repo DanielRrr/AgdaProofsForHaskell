@@ -4,7 +4,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; seto
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function
 open import Data.Product
-open import Data.Nat renaming (_+_ to _+ℕ_)
+open import Data.Nat
+import Data.Nat.Properties
 
 record Monoid (A : Set) : Set where
   constructor mkMonoid
@@ -34,29 +35,29 @@ record Monoid (A : Set) : Set where
   ^^prop : (a : A) → (m n : ℕ) → m ≡ n → a ^^ m ≡ a ^^ n
   ^^prop a m n refl = refl
 
-  plusZero : (n : ℕ) → n +ℕ zero ≡ n
+  plusZero : (n : ℕ) → n + zero ≡ n
   plusZero zero = refl
   plusZero (suc n) = begin
-                   (suc n +ℕ zero
+                   (suc n + zero
                    ≡⟨ refl ⟩
-                   suc (n +ℕ zero)
+                   suc (n + zero)
                    ≡⟨ cong suc (plusZero n) ⟩
                    refl)
 
   expEq : (a : A) → (m n : ℕ) → (m ≡ n) → (a ^^ m) ≡ (a ^^ n)
   expEq a m n refl = refl
 
-  postulate addProp : (m n : ℕ) → (m +ℕ suc n) ≡ (suc (m +ℕ n))
+  postulate addProp : (m n : ℕ) → (m + suc n) ≡ (suc (m + n))
   
 
-  expProp1 : (a : A) → (m n : ℕ) → ((a ^^ m) ● (a ^^ n)) ≡ (a ^^ (m +ℕ n))
+  expProp1 : (a : A) → (m n : ℕ) → ((a ^^ m) ● (a ^^ n)) ≡ (a ^^ (m + n))
   expProp1 a m zero = begin
                       (a ^^ m) ● (a ^^ zero)
                       ≡⟨ mon-●₁ (a ^^ zero) ε (a ^^ m) refl ⟩
                       (a ^^ m) ● ε
                       ≡⟨ ε-unit₁ (a ^^ m) ⟩
                       a ^^ m
-                      ≡⟨ ^^prop a m (m +ℕ zero) (sym (plusZero m)) ⟩
+                      ≡⟨ ^^prop a m (m + zero) (sym (plusZero m)) ⟩
                       refl
   expProp1 a m (suc n) = begin
                          (a ^^ m) ● (a ^^ (suc n)) 
@@ -64,13 +65,61 @@ record Monoid (A : Set) : Set where
                          (a ^^ m) ● (a ^^ n) ● a
                          ≡⟨ sym (assoc (a ^^ m) (a ^^ n) a) ⟩
                          ((a ^^ m) ● (a ^^ n)) ● a
-                         ≡⟨ mon-● ((a ^^ m) ● (a ^^ n)) (a ^^ (m +ℕ n)) a (expProp1 a m n) ⟩
+                         ≡⟨ mon-● ((a ^^ m) ● (a ^^ n)) (a ^^ (m + n)) a (expProp1 a m n) ⟩
                          sym
-                         (a ^^ (m +ℕ suc n)
-                         ≡⟨ expEq a (m +ℕ suc n) (suc (m +ℕ n)) (addProp m n) ⟩
+                         (a ^^ (m + suc n)
+                         ≡⟨ expEq a (m + suc n) (suc (m + n)) (addProp m n) ⟩
                          refl)
 
-open Monoid{{...}} public
+  expLemma : (n : ℕ) → ε ^^ n ≡ ε
+  expLemma zero = refl
+  expLemma (suc n) = begin
+                     (ε ^^ suc n
+                     ≡⟨ refl ⟩
+                     ε ^^ n ● ε
+                     ≡⟨ mon-● (ε ^^ n) ε ε (expLemma n) ⟩
+                     ε-unit₁ ε)
+
+  expLemma₁ : (a : A) → (m : ℕ) → ((a ^^ m) ● a) ≡ (a ● (a ^^ m))
+  expLemma₁ a zero = begin
+                     (a ^^ zero ● a
+                      ≡⟨ refl ⟩
+                      ε ● a
+                      ≡⟨ ε-unit₂ a ⟩
+                      sym
+                      (a ● a ^^ zero
+                      ≡⟨ mon-●₁ (a ^^ zero) ε a refl ⟩
+                      ε-unit₁ a))
+  expLemma₁ a (suc m) = begin
+                      a ^^ suc m ● a
+                      ≡⟨ refl ⟩
+                      (a ^^ m ● a) ● a
+                      ≡⟨ mon-● (a ^^ m ● a) (a ● (a ^^ m)) a (expLemma₁ a m) ⟩
+                      (a ● a ^^ m) ● a
+                      ≡⟨ assoc a (a ^^ m) a ⟩
+                      a ● a ^^ m ● a
+                      ≡⟨ mon-●₁ (a ^^ m ● a) (a ^^ suc m) a (sym refl) ⟩
+                      refl
+
+  expLemma₂ : (a b : A) → (m : ℕ) → (a ≡ b) → a ^^ m ≡ b ^^ m
+  expLemma₂ a b m refl = refl
+
+  expLemma₃ : (a : A) → (m n : ℕ) → (a ^^ m) ^^ suc n ≡ ((a ^^ m) ^^ n ● a)
+  expLemma₃ a m n = {!!}
+
+  expProp2 : (a : A) → (m n : ℕ) → ((a ^^ m) ^^ n) ≡ (a ^^ (m * n))
+  expProp2 a m zero = begin
+                      (a ^^ m) ^^ zero
+                      ≡⟨ refl ⟩
+                      ε
+                      ≡⟨ refl ⟩
+                      sym
+                      (a ^^ (m * zero)
+                      ≡⟨ ^^prop a (m * zero) zero (Data.Nat.Properties.*-comm m zero) ⟩
+                      refl)
+  expProp2 a m (suc n) = begin {!!}
+                     
+open Monoid {{...}} public
 
 record MonoidHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{M' : Monoid B}}(f : A → B) : Set where
   constructor mkMonoidHomomorphism
