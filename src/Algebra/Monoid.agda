@@ -104,9 +104,15 @@ record Monoid (A : Set) : Set where
   expLemma₂ : (a b : A) → (m : ℕ) → (a ≡ b) → a ^^ m ≡ b ^^ m
   expLemma₂ a b m refl = refl
 
-  expLemma₃ : (a : A) → (m n : ℕ) → (a ^^ m) ^^ suc n ≡ ((a ^^ m) ^^ n ● a)
-  expLemma₃ a m n = {!!}
+  expLemma₃ : (a : A) → a ^^ 1 ≡ a
+  expLemma₃ a = begin
+                a ^^ suc zero
+                ≡⟨ refl ⟩
+                a ^^ zero ● a
+                ≡⟨ mon-● (a ^^ zero) ε a refl ⟩
+                ε-unit₂ a
 
+        
   expProp2 : (a : A) → (m n : ℕ) → ((a ^^ m) ^^ n) ≡ (a ^^ (m * n))
   expProp2 a m zero = begin
                       (a ^^ m) ^^ zero
@@ -117,8 +123,25 @@ record Monoid (A : Set) : Set where
                       (a ^^ (m * zero)
                       ≡⟨ ^^prop a (m * zero) zero (Data.Nat.Properties.*-comm m zero) ⟩
                       refl)
-  expProp2 a m (suc n) = begin {!!}
-                     
+  expProp2 a m (suc n) = begin
+                       (a ^^ m) ^^ suc n
+                       ≡⟨ ^^prop (a ^^ m) (suc n) (1 + n) refl ⟩
+                       (a ^^ m) ^^ (1 + n)
+                       ≡⟨ sym (expProp1 (a ^^ m) 1 n) ⟩
+                       (a ^^ m) ^^ 1 ● (a ^^ m) ^^ n
+                       ≡⟨ mon-●₁ ((a ^^ m) ^^ n) (a ^^ (m * n)) ((a ^^ m) ^^ 1) (expProp2 a m n) ⟩
+                       (a ^^ m) ^^ 1 ● a ^^ (m * n)
+                       ≡⟨ mon-● ((a ^^ m) ^^ 1) (a ^^ m) ( a ^^ (m * n)) (expLemma₃ (a ^^ m)) ⟩
+                       a ^^ m ● a ^^ (m * n)
+                       ≡⟨ mon-●₁ (a ^^ (m * n)) (a ^^ (n * m)) (a ^^ m) (^^prop a (m * n) (n * m) (Data.Nat.Properties.*-comm m n)) ⟩
+                       a ^^ m ● a ^^ (n * m)
+                       ≡⟨ expProp1 a m (n * m) ⟩
+                       a ^^ (m + n * m)
+                       ≡⟨ ^^prop a (m + n * m) (suc n * m) (sym refl) ⟩
+                       a ^^ (suc n * m)
+                       ≡⟨ ^^prop a (suc n * m) (m * suc n) (Data.Nat.Properties.*-comm (suc n) m) ⟩
+                       refl                                                                                                                                    
+                                                                                       
 open Monoid {{...}} public
 
 record MonoidHomomorphism (A : Set)(B : Set){{M : Monoid A}}{{M' : Monoid B}}(f : A → B) : Set where
