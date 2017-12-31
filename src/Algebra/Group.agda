@@ -11,7 +11,7 @@ open import Data.List
 open import Data.Fin.Subset
 open import Data.Nat
 open import Data.Vec as V
-open import Data.Integer
+open import Data.Integer 
 
 record Group (A : Set){{Mo : Monoid A}} : Set where
   constructor mkGroup
@@ -219,6 +219,15 @@ record Group (A : Set){{Mo : Monoid A}} : Set where
 
   eq-rightCoset :  (a b : A) → (xs : List A) → (a ≡ b) → rightCoset xs a ≡ rightCoset xs b
   eq-rightCoset a b xs refl = refl
+
+  infixr 7 _^^^_
+
+  _^^^_ : A → ℤ → A
+  a ^^^ +_ zero = ε
+  a ^^^ +_ (ℕ.suc n) = a ^^^ +_ n ● a
+  a ^^^ -[1+_] zero = inv a
+  a ^^^ -[1+_] (ℕ.suc n) = (a ^^^ -[1+_] n) ● (inv a)
+
 
 open Group {{...}} public
 
