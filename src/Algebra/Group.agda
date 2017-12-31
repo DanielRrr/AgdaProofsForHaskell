@@ -8,6 +8,10 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function
 open import Data.Product
 open import Data.List
+open import Data.Fin.Subset
+open import Data.Nat
+open import Data.Vec as V
+open import Data.Integer
 
 record Group (A : Set){{Mo : Monoid A}} : Set where
   constructor mkGroup
@@ -222,6 +226,27 @@ record Abelian (A : Set){{Mon : Monoid A}}{{GR : Group A}} : Set where
   constructor mkAbelian
   field
     commute : (a b : A) → (a ● b) ≡ (b ● a)
+
+  listProp : (x y : A) → (xs ys : List A) → (x ≡ y) → (xs ≡ ys) → (x ∷ xs) ≡ (y ∷ ys)
+  listProp x y xs ys refl refl = refl
+
+  CosetEq : (a : A) → (xs : List A) → leftCoset a xs ≡ rightCoset xs a
+  CosetEq a [] = begin leftCoset a []
+                       ≡⟨ refl ⟩
+                       []
+                       ≡⟨ refl ⟩
+                       sym
+                       (rightCoset [] a
+                       ≡⟨ refl ⟩
+                       []
+                       ≡⟨ refl ⟩
+                       refl)
+  CosetEq a (x ∷ xs) = begin
+                       leftCoset a (x ∷ xs)
+                       ≡⟨ refl ⟩
+                       (a ● x) ∷ leftCoset a xs
+                       ≡⟨ listProp (a ● x) (x ● a) (leftCoset a xs) (rightCoset xs a) (commute a x) (CosetEq a xs) ⟩
+                       refl
 open Abelian {{...}} public
 
 
