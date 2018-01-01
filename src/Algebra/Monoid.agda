@@ -164,7 +164,7 @@ open MonoidHomomorphism{{...}} public
                                               refl
 
 
-pairProd : ∀ {A B} → (a b : A × B) → (proj₁ a ≡ proj₁ b) → (proj₂ a ≡ proj₂ b) → (a ≡ b)
+pairProd : ∀ {A B : Set} → (a b : A × B) → (proj₁ a ≡ proj₁ b) → (proj₂ a ≡ proj₂ b) → (a ≡ b)
 pairProd a b refl refl = refl
 
 prodMonoid : (A : Set)(B : Set){{M₁ : Monoid A}}{{M₂ : Monoid B}} → Monoid (A × B)
@@ -186,3 +186,9 @@ prodMonoid A B = mkMonoid (λ x → λ y → ( proj₁ x ● proj₁ y) , proj�
                            ((ε ● proj₁ x) , (ε ● proj₂ x)
                            ≡⟨ pairProd ((ε ● proj₁ x) , (ε ● proj₂ x)) x (ε-unit₂ (proj₁ x)) (ε-unit₂ (proj₂ x)) ⟩
                            refl))
+
+record Monomorphism (A : Set)(B : Set)(f : A → B){{M₁ : Monoid A}}{{M₂ : Monoid B}}{{F : MonoidHomomorphism A B f}} : Set where
+  constructor mkMonomorphism
+  field
+    monic : (a b : A) → (f a ≡ f b) → a ≡ b
+open Monomorphism {{...}} public
