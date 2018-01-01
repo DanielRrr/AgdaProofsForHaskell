@@ -162,3 +162,27 @@ open MonoidHomomorphism{{...}} public
                                               g ((f a) ● (f b))
                                               ≡⟨ resp● (f a) (f b) ⟩
                                               refl
+
+
+pairProd : ∀ {A B} → (a b : A × B) → (proj₁ a ≡ proj₁ b) → (proj₂ a ≡ proj₂ b) → (a ≡ b)
+pairProd a b refl refl = refl
+
+prodMonoid : (A : Set)(B : Set){{M₁ : Monoid A}}{{M₂ : Monoid B}} → Monoid (A × B)
+prodMonoid A B = mkMonoid (λ x → λ y → ( proj₁ x ● proj₁ y) , proj₂ x ● proj₂ y)
+                           (ε , ε)
+                           (λ x y z →
+                           pairProd
+                           ( ((proj₁ x ● proj₁ y) ● proj₁ z) , (proj₂ x ● proj₂ y) ● proj₂ z)
+                           ((proj₁ x ● proj₁ y ● proj₁ z) , ((proj₂ x ● proj₂ y ● proj₂ z)))
+                           (assoc (proj₁ x) (proj₁ y) (proj₁ z))
+                           (assoc (proj₂ x) (proj₂ y) (proj₂ z)))
+                           (λ x →
+                           begin
+                           (proj₁ x ● ε) , (proj₂ x ● ε)
+                           ≡⟨ pairProd ((proj₁ x ● ε) , (proj₂ x ● ε)) x (ε-unit₁ (proj₁ x)) (ε-unit₁ (proj₂ x)) ⟩
+                           refl)
+                           (λ x →
+                           begin
+                           ((ε ● proj₁ x) , (ε ● proj₂ x)
+                           ≡⟨ pairProd ((ε ● proj₁ x) , (ε ● proj₂ x)) x (ε-unit₂ (proj₁ x)) (ε-unit₂ (proj₂ x)) ⟩
+                           refl))
