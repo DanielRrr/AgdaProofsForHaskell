@@ -11,7 +11,9 @@ open import Data.List
 open import Data.Fin.Subset
 open import Data.Nat
 open import Data.Vec as V
-open import Data.Integer 
+open import Data.Integer renaming (_+_ to _+ℤ_; _*_ to _*ℤ_) 
+open import Data.Integer.Properties
+import Data.Nat.Properties 
 
 record Group (A : Set){{Mo : Monoid A}} : Set where
   constructor mkGroup
@@ -228,6 +230,105 @@ record Group (A : Set){{Mo : Monoid A}} : Set where
   a ^^^ -[1+_] zero = inv a
   a ^^^ -[1+_] (ℕ.suc n) = (a ^^^ -[1+_] n) ● (inv a)
 
+  ^^^prop₁ : (a : A) → (m n : ℤ) → (m ≡ n) → (a ^^^ m) ≡ (a ^^^ n)
+  ^^^prop₁ a m n refl = refl
+
+  ^^^prop₂ : (a b : A) → (m : ℤ) → (a ≡ b) → (a ^^^ m) ≡ (b ^^^ m)
+  ^^^prop₂ a b m refl = refl
+
+  expLemma1 : (a : A) → a ^^^ + 1 ≡ a
+  expLemma1 a = begin
+                (a ^^^ + ℕ.suc zero
+                ≡⟨ refl ⟩
+                (a ^^^ + zero ● a)
+                ≡⟨ mon-● (a ^^^ + zero) ε a refl ⟩
+                ε-unit₂ a)
+
+  monℤ : (m n p : ℤ) → (m ≡ n) → (p +ℤ m) ≡ (p +ℤ n) 
+  monℤ m n p refl = refl
+
+  monℤ₁ : (m n p : ℤ) → (m ≡ n) → (m +ℤ p) ≡ (n +ℤ p)
+  monℤ₁ m n p refl = refl
+
+  monℕ₁ : (m n p : ℕ) → (m ≡ n) → (p + m) ≡ (p + n)
+  monℕ₁ m n p refl = refl
+
+  addℕ : (m n : ℕ) → m + ℕ.suc n ≡ ℕ.suc (m + n)
+  addℕ zero n = refl
+  addℕ (ℕ.suc m) n = begin
+                     ((ℕ.suc m + ℕ.suc n)
+                     ≡⟨ refl ⟩
+                     (1 + (m + ℕ.suc n))
+                     ≡⟨ monℕ₁ (m + ℕ.suc n) (ℕ.suc (m + n)) 1 (addℕ m n)  ⟩
+                     refl)
+  
+  addℤ : (m n : ℕ) → + m +ℤ + (1 + n) ≡ + ℕ.suc (m + n)
+  addℤ m zero = begin
+                ((+ m +ℤ + (1 + zero))
+                ≡⟨ monℤ (+ (1 + zero)) (+ 1) (+ m) refl ⟩
+                + m +ℤ + 1
+                ≡⟨ refl ⟩
+                + (m + 1)
+                ≡⟨ cong +_ (Data.Nat.Properties.+-comm m 1) ⟩
+                + (1 + m)
+                ≡⟨ refl ⟩
+                (+ ℕ.suc m)
+                ≡⟨ cong +_ (sym (Data.Nat.Properties.+-identityʳ (ℕ.suc m))) ⟩
+                refl)
+  addℤ m (ℕ.suc n) = begin
+                ((+ m +ℤ + (1 + ℕ.suc n))
+                ≡⟨ monℤ (+ (1 + ℕ.suc n)) (+ (ℕ.suc n + 1)) (+ m) (cong +_ (Data.Nat.Properties.+-comm 1 (ℕ.suc n))) ⟩
+                + m +ℤ + (ℕ.suc n + 1)
+                ≡⟨ monℤ (+ (ℕ.suc n + 1)) (+ ℕ.suc n +ℤ + 1) (+ m) refl ⟩
+                + m +ℤ (+ ℕ.suc n +ℤ + 1)
+                ≡⟨ sym (+-assoc (+ m) (+ ℕ.suc n) (+ 1)) ⟩
+                (+ m +ℤ + ℕ.suc n) +ℤ + 1
+                ≡⟨ monℤ₁ (+ m +ℤ + ℕ.suc n) (+ ℕ.suc (m + n)) (+ 1) (addℤ m n) ⟩
+                + ℕ.suc (m + n) +ℤ + 1
+                ≡⟨ +-comm (+ ℕ.suc (m + n)) (+ 1) ⟩
+                + 1 +ℤ + ℕ.suc (m + n)
+                ≡⟨ monℤ (+ ℕ.suc (m + n)) (+ (m + ℕ.suc n)) (+ 1) (cong +_ (sym (addℕ m n))) ⟩
+                refl)
+
+  exp₁ : (a : A) → (m n : ℤ) → ((a ^^^ m) ● (a ^^^ n)) ≡ (a ^^^ (m +ℤ n))
+  exp₁ a m (+_ zero) = begin
+                       (a ^^^ m) ● (a ^^^ + zero)
+                       ≡⟨ mon-●₁ (a ^^^ + zero) ε (a ^^^ m) refl ⟩
+                       (a ^^^ m) ● ε
+                       ≡⟨ ε-unit₁ (a ^^^ m) ⟩
+                       sym
+                       (a ^^^ (m +ℤ + zero)
+                       ≡⟨ ^^^prop₁ a (m +ℤ + zero) m (+-identityʳ m) ⟩
+                       refl)
+  exp₁ a (+_ m) (+_ (ℕ.suc n)) =
+                       begin
+                       ((a ^^^ + m) ● (a ^^^ + ℕ.suc n)
+                       ≡⟨ mon-●₁ (a ^^^ + ℕ.suc n) (a ^^^ + n ● a) (a ^^^ + m) refl ⟩
+                       a ^^^ + m ● a ^^^ + n ● a
+                       ≡⟨ sym (assoc (a ^^^ + m) (a ^^^ + n) a) ⟩
+                       ((a ^^^ + m ● a ^^^ + n) ● a)
+                       ≡⟨ mon-● (a ^^^ + m ● a ^^^ + n) (a ^^^ (+ m +ℤ + n)) a (exp₁ a (+ m) (+ n)) ⟩
+                       a ^^^ (+ m +ℤ + n) ● a
+                       ≡⟨ mon-● (a ^^^ (+ m +ℤ + n)) (a ^^^ + (m + n)) a (^^^prop₁ a (+ m +ℤ + n) (+ (m + n)) refl) ⟩
+                       a ^^^ + (m + n) ● a
+                       ≡⟨ sym refl ⟩
+                       a ^^^ (+ ℕ.suc (m + n))
+                       ≡⟨ refl ⟩
+                       sym
+                       (a ^^^ (+ m +ℤ + ℕ.suc n)
+                       ≡⟨ ^^^prop₁ a (+ m +ℤ + ℕ.suc n) (+ m +ℤ + (1 + n) ) (monℤ (+ ℕ.suc n) (+ (1 + n)) (+ m) refl) ⟩
+                       a ^^^ (+ m +ℤ + (1 + n))
+                       ≡⟨ ^^^prop₁ a (+ m +ℤ + (1 + n)) (+ ℕ.suc (m + n)) (addℤ m n) ⟩
+                       refl))
+  exp₁ a (-[1+_] m) (+_ (ℕ.suc n)) = {!!}
+  exp₁ a m (-[1+_] zero) = {!!}
+  exp₁ a m (-[1+_] (ℕ.suc n)) = {!!}
+
+  exp₂ : (a : A) → (m n : ℤ) → ((a ^^^ m) ^^^ n) ≡ (a ^^^ (m *ℤ n))
+  exp₂ a m (+_ zero) = {!!}
+  exp₂ a m (+_ (ℕ.suc n)) = {!!}
+  exp₂ a m (-[1+_] zero) = {!!}
+  exp₂ a m (-[1+_] (ℕ.suc n)) = {!!}
 
 open Group {{...}} public
 
