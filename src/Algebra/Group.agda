@@ -197,8 +197,8 @@ record Group (A : Set){{Mo : Monoid A}} : Set where
                       ≡⟨ mon-●₁ ((inv a ● b) ● a) (inv a ● b ● a) (inv b) (assoc (inv a) b a) ⟩
                       refl))
 
-  commmutatorTheorem : (a b : A) → ((commutator a b) ≡ ε) → (a ● b) ≡ (b ● a)
-  commmutatorTheorem a b f = sym
+  commmutatorTheorem₁ : (a b : A) → ((commutator a b) ≡ ε) → (a ● b) ≡ (b ● a)
+  commmutatorTheorem₁ a b f = sym
                              (begin
                              (b ● a) ≡⟨ (mon-●₁ a (a ● commutator a b) b (sym ((a ● commutator a b) ≡⟨ (mon-●₁ (commutator a b) ε a f) ⟩ ε-unit₁ a))) ⟩
                              (b ● a ● commutator a b) ≡⟨ refl ⟩
@@ -207,6 +207,25 @@ record Group (A : Set){{Mo : Monoid A}} : Set where
                              ((a ● inv a) ● inv b ● a ● b) ≡⟨ (mon-● (a ● inv a) ε (inv b ● a ● b) (inv-axiom₂ a)) ⟩ ε-unit₂ (inv b ● a ● b)) ⟩
                              (b ● inv b ● a ● b) ≡⟨ (sym (assoc b (inv b) (a ● b))) ⟩
                              ((b ● inv b) ● a ● b) ≡⟨ (mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b)) ⟩ ε-unit₂ (a ● b))
+
+
+  commutatorTheorem₂ : (a b : A) → (b ● a ● commutator a b) ≡ (a ● b)
+  commutatorTheorem₂ a b = begin
+                           ((b ● a ● (inv a ● inv b ● a ● b))
+                           ≡⟨ mon-●₁
+                           (a ● inv a ● inv b ● a ● b) (inv b ● a ● b) b
+                           (a ● inv a ● inv b ● a ● b
+                           ≡⟨ sym (assoc a (inv a) (inv b ● a ● b)) ⟩
+                           (a ● inv a) ● inv b ● a ● b
+                           ≡⟨ mon-● (a ● inv a) ε (inv b ● a ● b) (inv-axiom₂ a) ⟩
+                           ε ● inv b ● a ● b
+                           ≡⟨ ε-unit₂ (inv b ● a ● b) ⟩
+                           refl) ⟩
+                           b ● inv b ● a ● b
+                           ≡⟨ sym (assoc b (inv b) (a ● b)) ⟩
+                           ((b ● inv b) ● a ● b)
+                           ≡⟨ mon-● (b ● inv b) ε (a ● b) (inv-axiom₂ b) ⟩
+                           ε-unit₂ (a ● b))
 
   leftCoset : (a : A) → List A → List A
   leftCoset a [] = []
