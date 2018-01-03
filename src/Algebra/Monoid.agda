@@ -192,3 +192,9 @@ record Monomorphism (A : Set)(B : Set)(f : A → B){{M₁ : Monoid A}}{{M₂ : M
   field
     monic : (a b : A) → (f a ≡ f b) → a ≡ b
 open Monomorphism {{...}} public
+
+record MonoidIso (A : Set)(B : Set)(f : A → B){{M₁ : Monoid A}}{{M₂ : Monoid B}}{{F : MonoidHomomorphism A B f}} : Set where
+  constructor mkMonoidIso
+  field
+    iso : (a : A) → (b : B) → Σ (B → A) (λ g → (((f ∘ g) $ b) ≡ b) × ((g ∘ f) $ a) ≡ a)
+open MonoidIso {{...}} public
